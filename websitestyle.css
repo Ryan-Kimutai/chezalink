@@ -1,3 +1,4 @@
+/* Reset & base styles */
 * {
   margin: 0;
   padding: 0;
@@ -8,121 +9,214 @@ html {
   scroll-behavior: smooth;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('Football.jpg'); /* Use your actual path */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+  filter: brightness(0.4); /* optional: darkens image for better text contrast */
+}
+
+
+/* Typography */
 body {
-  font-family: Arial, sans-serif;
-  line-height: 1.6;
-  background-color: #f0f0f0;
+  font-family: 'Open Sans', sans-serif;
+  color: white;
+}
+
+h1, h2, h3, .main-title, .section-title {
+  font-family: 'Poppins', sans-serif;
+}
+
+.main-title {
+  font-size: 10rem; /* Increased from 4rem to 6rem */
+  color: white;
+  text-align: center;
+  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/* Home Logo Styling */
+.home-logo {
+  font-size: 6rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.home-logo span {
+  color: rgba(24, 233, 69, 0.85);
+}
+/* Home Logo Animation */
+.home-logo {
+  font-size: 6rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
+  margin-bottom: 30px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeSlideIn 1.2s ease-out forwards;
+  animation-delay: 0.5s;
+}
+
+.home-logo span {
+  color: rgba(24, 233, 69, 0.85);
+}
+
+/* Fade & Slide animation */
+@keyframes fadeSlideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+.logo {
+  font-size: 3.5rem; /* Larger logo font */
+  color: white;
+  font-weight: bold;
+}
+
+.logo span {
+  color: rgba(24, 233, 69, 0.85);
+}
+
+
+.section-title {
+  font-size: 2.5rem;
+  color: white;
+  text-align: center;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
 }
 
 /* Header & Nav */
-header {
+
+
+.navbar {
   position: fixed;
+  top: 0;
   width: 100%;
-  background: white;
+  background-color: rgb(0, 0, 0, 0.5);
+  padding: 20px 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   z-index: 1000;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+ 
 }
 
-nav {
-  background: #0a3d0a;
-}
-
-nav ul {
-  list-style: none;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  padding: 10px;
-  margin: 0;
-}
-
-nav ul li {
-  margin: 0 15px;
-}
-
-nav ul li a {
+.logo {
+  font-size: 24px;
   color: white;
-  text-decoration: none;
   font-weight: bold;
-  transition: color 0.3s;
 }
 
-nav ul li a:hover {
-  color: #0be333;
+.logo span {
+  color: rgba(24, 233, 69, 0.797);
+}
+
+.nav-links a {
+  margin-left: 30px;
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  position: relative;
+}
+
+.nav-links a:hover,
+.nav-links a:focus {
+  color: rgba(24, 233, 69, 0.797);
+}
+
+.nav-links a::after {
+  content: '';
+  display: block;
+  width: 0%;
+  height: 2px;
+  background: rgba(0, 255, 17, 0.756);
+  transition: 0.3s;
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
 }
 
 /* Sections */
 .screen-section {
+  background: transparent;
   position: relative;
-  width: 100%;
-  height: 100vh;
   color: white;
+  padding: 100px 20px;
+  min-height: 100vh;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  text-align: center;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  padding: 30px;
-}
-
-.section-content {
-  position: relative;
   z-index: 1;
 }
 
-.overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.55);
-  z-index: 0;
-}
 
-#home {
-  background-image: url('African\ football.jpg');
-}
 
-#about {
-  background-image: url('AF2.jpg');
-}
 
-#services {
-  background-image: url('AF3.jpg');
-}
-
-#team {
-  background-image: url('AF4.jpg');
-}
-
-#contact {
-  background: #f2f2f2;
-  color: #222;
-}
-
-/* Scroll Arrows */
-.scroll-arrow {
-  font-size: 2rem;
-  color: #fff;
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: bounce 2s infinite;
-  cursor: pointer;
+/* Home content */
+.home-content {
+  text-align: center;
   z-index: 2;
 }
 
+.get-app-btn {
+  display: inline-block;
+  margin-top: 20px;
+  background-color: #0be333;
+  color: white;
+  padding: 12px 20px;
+  font-size: 1rem;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.get-app-btn i {
+  margin-right: 10px;
+}
+
+.get-app-btn:hover {
+  background-color: #0a3d0a;
+}
+
+/* Scroll down arrow */
+.scroll-down {
+  position: absolute;
+  bottom: 20px;
+  font-size: 2rem;
+  color: white;
+  animation: bounce 2s infinite;
+}
+
 @keyframes bounce {
-  0%, 100% {
-    transform: translateX(-50%) translateY(0);
-  }
-  50% {
-    transform: translateX(-50%) translateY(10px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
 }
 
 /* Team Cards */
@@ -131,53 +225,59 @@ nav ul li a:hover {
   flex-wrap: wrap;
   justify-content: center;
   gap: 20px;
-  margin-top: 30px;
+  padding: 20px;
 }
 
 .team-card {
-  background: white;
-  border: 1px solid #ccc;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 10px;
   width: 250px;
   padding: 15px;
   text-align: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: transform 0.3s;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  opacity: 0;
+  transform: translateY(30px);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.team-card:hover {
+  transform: scale(1.05) translateY(0);
+  box-shadow: 0 8px 20px rgba(0, 255, 64, 0.4);
+  opacity: 1;
+}
+
+.team-card.visible {
+  opacity: 0.7;
+  transform: translateY(0);
+  backdrop-filter: blur(10px);
 }
 
 .team-card img {
   width: 100%;
   height: auto;
-  object-fit: cover;
   border-radius: 10px 10px 0 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.4s ease;
 }
 
-.team-card h3 {
-  margin: 10px 0 5px;
-  color: #0a3d0a;
+.team-card:hover img {
+  transform: scale(1.05);
 }
 
-.team-card p {
-  color: #555;
-  font-size: 0.95rem;
+
+
+.team-card h3,
+.team-card p,
+.team-card .social-links a {
+  color: white;
 }
 
-.team-card:hover {
-  transform: translateY(-5px);
-}
-
-.social-links {
-  margin-top: 10px;
-}
-
-.social-links a {
-  margin: 0 5px;
-  color: #0a3d0a;
-  font-size: 1.2rem;
-  transition: color 0.3s ease;
-}
-
-.social-links a:hover {
+.team-card .social-links a:hover {
   color: #0be333;
 }
 
@@ -187,6 +287,33 @@ footer {
   padding: 20px;
   background: #0a3d0a;
   color: white;
+}
+
+/* Loader */
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loader-circle {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #0a3d0a;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Responsive */
@@ -200,27 +327,42 @@ footer {
     flex-direction: column;
     align-items: center;
   }
+
+  .main-title {
+    font-size: 2.8rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
 }
-.get-app-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 20px;
-  padding: 12px 20px;
-  background-color: #0a3d0a;
-  color: white;
-  text-decoration: none;
-  font-weight: bold;
-  border-radius: 6px;
-  font-size: 16px;
-  transition: background-color 0.3s;
+@media (max-width: 768px) {
+  .team-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .team-card {
+    width: 90%; /* Make it take most of the screen on small devices */
+    max-width: 300px;
+  }
+
+  .main-title {
+    font-size: 2.8rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+  .home-logo {
+  font-size: 3rem;
+}
+@media (max-width: 768px) {
+  .home-logo {
+    font-size: 3rem;
+  }
 }
 
-.get-app-btn:hover {
-  background-color: #0be333;
-  color: black;
+
 }
 
-.get-app-btn i {
-  font-size: 20px;
-}

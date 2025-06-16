@@ -1,77 +1,94 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const teamData = [
-    {
-      name: "Ryan Kimutai",
-      role: "Project Lead/Lead Devloper",
-      image: "images/alice.jpg",
-      github: "https://github.com/alicewanjiku",
-      twitter: "https://twitter.com/alicewanjiku",
-      linkedin: "https://linkedin.com/in/alicewanjiku"
-    },
-    {
-      name: "Brian Kamau",
-      role: "Backend Developer",
-      image: "images/brian.jpg",
-      github: "https://github.com/brianotieno",
-      twitter: "https://twitter.com/brianotieno",
-      linkedin: "https://linkedin.com/in/brianotieno"
-    },
-    {
-      name: "Kweyah Polo",
-      role: "Frontend Developer",
-      image: "Kweyah ChezaLink.jpg",
-      github: "https://github.com/cynthiamwangi",
-      twitter: "https://twitter.com/cynthiamwangi",
-      linkedin: "https://linkedin.com/in/cynthiamwangi"
-    },
-    {
-      name: "Joshua Muimi",
-      role: "UI/UX Designer",
-      image: "images/david.jpg",
-      github: "https://github.com/davidkimani",
-      twitter: "https://twitter.com/davidkimani",
-      linkedin: "https://linkedin.com/in/davidkimani"
-    },
-    {
-      name: "Hillary Inyait",
-      role: "Research and Database Management",
-      image: "images/evelyn.jpg",
-      github: "https://github.com/evelynnjeri",
-      twitter: "https://twitter.com/evelynnjeri",
-      linkedin: "https://linkedin.com/in/evelynnjeri"
-    }
-  ];
+// Page Loader
+window.addEventListener("load", () => {
+  document.getElementById("loader").style.display = "none";
+});
 
-  const teamContainer = document.querySelector(".team-cards");
+// Team member data
+const teamMembers = [
+  {
+    name: "Ryan Kimutai",
+    role: "Project Lead/Lead Dev",
+    image: "images/member1.jpg",
+    github: "https://github.com/amina",
+    twitter: "https://twitter.com/amina",
+    linkedin: "https://linkedin.com/in/amina"
+  },
+  {
+    name: "Brian Kamau",
+    role: "Backend Developer",
+    image: "images/member2.jpg",
+    github: "https://github.com/brian",
+    twitter: "https://twitter.com/brian",
+    linkedin: "https://linkedin.com/in/brian"
+  },
+  {
+    name: "Kweyah Polo",
+    role: "Frontend Developer",
+    image: "Kweyah ChezaLink.jpg",
+    github: "https://github.com/kweyah",
+    twitter: "https://twitter.com/kweyahh",
+    linkedin: "https://linkedin.com/in/faith"
+  },
+  {
+    name: "Joshua Muimi",
+    role: "UI/UX Designer",
+    image: "images/member4.jpg",
+    github: "https://github.com/kevin",
+    twitter: "https://twitter.com/kevin",
+    linkedin: "https://linkedin.com/in/kevin"
+  },
+  {
+    name: "Hillary Inyait",
+    role: "Research and Database Management",
+    image: "images/member5.jpg",
+    github: "https://github.com/lilian",
+    twitter: "https://twitter.com/lilian",
+    linkedin: "https://linkedin.com/in/lilian"
+  }
+];
 
-  teamData.forEach(member => {
-    const card = document.createElement("div");
-    card.classList.add("team-card");
+// Inject cards
+const teamContainer = document.getElementById("team-cards-container");
 
-    const img = document.createElement("img");
-    img.src = member.image;
-    img.alt = `${member.name}`;
+teamMembers.forEach(member => {
+  const card = document.createElement("div");
+  card.classList.add("team-card");
 
-    const name = document.createElement("h3");
-    name.textContent = member.name;
-
-    const role = document.createElement("p");
-    role.textContent = member.role;
-
-    const socialDiv = document.createElement("div");
-    socialDiv.classList.add("social-links");
-
-    socialDiv.innerHTML = `
+  card.innerHTML = `
+    <img src="${member.image}" alt="${member.name}">
+    <h3>${member.name}</h3>
+    <p>${member.role}</p>
+    <div class="social-links">
       <a href="${member.github}" target="_blank"><i class="fab fa-github"></i></a>
       <a href="${member.twitter}" target="_blank"><i class="fab fa-twitter"></i></a>
       <a href="${member.linkedin}" target="_blank"><i class="fab fa-linkedin"></i></a>
-    `;
+    </div>
+  `;
 
-    card.appendChild(img);
-    card.appendChild(name);
-    card.appendChild(role);
-    card.appendChild(socialDiv);
+  teamContainer.appendChild(card);
+});
 
-    teamContainer.appendChild(card);
+// Scroll reveal effect for cards
+function revealCardsOnScroll() {
+  const cards = document.querySelectorAll('.team-card');
+  cards.forEach(card => {
+    const rect = card.getBoundingClientRect();
+    if (rect.top < window.innerHeight - 100) {
+      card.classList.add('visible');
+    }
+  });
+}
+
+window.addEventListener("scroll", revealCardsOnScroll);
+window.addEventListener("load", revealCardsOnScroll);
+
+// Smooth scroll arrows
+document.querySelectorAll(".scroll-down").forEach(arrow => {
+  arrow.addEventListener("click", () => {
+    const current = arrow.closest("section");
+    const next = current.nextElementSibling;
+    if (next) next.scrollIntoView({ behavior: "smooth" });
   });
 });
+
+  
