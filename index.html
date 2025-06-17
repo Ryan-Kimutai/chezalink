@@ -26,17 +26,23 @@
 
   <!-- Header -->
 <header>
-  <div class="navbar">
-    <div class="logo">ぷ Cheza<span>Link</span></div>
-    <div class="hamburger" id="hamburger">
-      <i class="fas fa-bars"></i>
-    </div>
-    <div class="nav-links" id="nav-links">
-      <a href="#home">Home</a>
-      <a href="#about">About us</a>
-      <a href="#services">Services</a>
-      <a href="#team">Team</a>
-    </div>
+<div class="navbar">
+  <div class="logo">ぷ Cheza<span>Link</span></div>
+  <div class="hamburger" id="hamburger">
+    <i class="fas fa-bars"></i>
+  </div>
+  <div class="nav-links" id="nav-links">
+    <a href="#home">Home</a>
+    <a href="#about">About us</a>
+    <a href="#services">Services</a>
+    <a href="#team">Team</a>
+  </div>
+</div>
+
+  
+  </div>
+</div>
+
   </div>
 </header>
 
@@ -106,14 +112,27 @@
       mirror: true
     });
   </script>
-  <script>
+ <script>
   const hamburger = document.getElementById('hamburger');
   const navLinks = document.getElementById('nav-links');
 
+  // Toggle the nav menu when hamburger is clicked
   hamburger.addEventListener('click', () => {
     navLinks.classList.toggle('show');
   });
+
+  // Close the menu when a link is clicked (mobile)
+  const navItems = navLinks.querySelectorAll('a');
+  navItems.forEach(link => {
+    link.addEventListener('click', () => {
+      navLinks.classList.remove('show');
+    });
+  });
 </script>
+
+
+
+
 
 </body>
 </html>

@@ -90,5 +90,9 @@ document.querySelectorAll(".scroll-down").forEach(arrow => {
     if (next) next.scrollIntoView({ behavior: "smooth" });
   });
 });
+function toggleMenu() {
+  const navLinks = document.querySelector('.nav-links');
+  navLinks.classList.toggle('active');
+}
 
   

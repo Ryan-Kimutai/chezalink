@@ -1,4 +1,6 @@
-/* Reset & base styles */
+/* ----------------------- */
+/* Base Reset & Body Style */
+/* ----------------------- */
 * {
   margin: 0;
   padding: 0;
@@ -9,6 +11,11 @@ html {
   scroll-behavior: smooth;
 }
 
+body {
+  font-family: 'Open Sans', sans-serif;
+  color: white;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -16,160 +23,95 @@ body::before {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-image: url('Football.jpg'); /* Use your actual path */
+  background-image: url('Football.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   z-index: -1;
-  filter: brightness(0.4); /* optional: darkens image for better text contrast */
+  filter: brightness(0.4);
 }
 
-
+/* ----------------------- */
 /* Typography */
-body {
-  font-family: 'Open Sans', sans-serif;
-  color: white;
-}
-
+/* ----------------------- */
 h1, h2, h3, .main-title, .section-title {
   font-family: 'Poppins', sans-serif;
 }
 
-.main-title {
-  font-size: 10rem; /* Increased from 4rem to 6rem */
-  color: white;
+.section-title {
+  font-size: 2.5rem;
   text-align: center;
-  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-/* Home Logo Styling */
-.home-logo {
-  font-size: 6rem;
-  font-weight: bold;
-  color: white;
-  text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
-  margin-bottom: 30px;
-  text-align: center;
+  margin: 40px 0 20px;
+  text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
 }
 
-.home-logo span {
+/* ----------------------- */
+/* Logo Styles */
+/* ----------------------- */
+.logo, .home-logo {
+  font-weight: bold;
+  text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
+  text-align: center;
+  color: white;
+}
+
+.logo {
+  font-size: 24px; /* Original size */
+  color: white;
+  font-weight: bold;
+}
+
+
+.logo span, .home-logo span {
   color: rgba(24, 233, 69, 0.85);
 }
+
+/* ----------------------- */
 /* Home Logo Animation */
-/* Home Logo Hybrid Animation */
+/* ----------------------- */
 .home-logo {
   font-size: 6rem;
-  font-weight: bold;
-  color: white;
-  text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
   margin-bottom: 30px;
-  text-align: center;
-
   overflow: hidden;
   white-space: nowrap;
   width: 0;
   opacity: 0;
   transform: translateY(20px);
-
-  animation:
-    typingFadeSlide 3s steps(30, end) forwards,
-    blink 0.4s step-end infinite;
+  animation: typingFadeSlide 3s steps(30, end) forwards, blink 0.4s step-end infinite;
 }
 
-.home-logo span {
-  color: rgba(24, 233, 69, 0.85);
-}
-
-/* Combined typing, fade and slide */
 @keyframes typingFadeSlide {
-  0% {
-    width: 0;
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  70% {
-    width: 100%;
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    width: 100%;
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0% { width: 0; opacity: 0; transform: translateY(20px); }
+  70%, 100% { width: 100%; opacity: 1; transform: translateY(0); }
 }
 
 @keyframes blink {
-  50% {
-    border-color: transparent;
-  }
+  50% { border-color: transparent; }
 }
 
-
-
-
-/* Responsive scaling */
-@media (max-width: 768px) {
-  .home-logo {
-    font-size: 3rem;
-  }
-}
-
-
-
-
-.logo {
-  font-size: 3.5rem; /* Larger logo font */
-  color: white;
-  font-weight: bold;
-}
-
-.logo span {
-  color: rgba(24, 233, 69, 0.85);
-}
-
-
-.section-title {
-  font-size: 2.5rem;
-  color: white;
-  text-align: center;
-  margin-top: 40px;
-  margin-bottom: 20px;
-  text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
-}
-
-/* Header & Nav */
-
-
+/* ----------------------- */
+/* Navbar & Dropdown */
+/* ----------------------- */
 .navbar {
   position: fixed;
   top: 0;
   width: 100%;
-  background-color: rgb(0, 0, 0, 0.5);
-  padding: 20px 60px;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 20px 60px; /* Original spacing */
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 1000;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
- 
 }
 
-.logo {
-  font-size: 24px;
-  color: white;
-  font-weight: bold;
-}
 
-.logo span {
-  color: rgba(24, 233, 69, 0.797);
+.nav-links {
+  display: flex;
+  gap: 30px;
 }
 
 .nav-links a {
-  margin-left: 30px;
   text-decoration: none;
   color: white;
   font-weight: 500;
@@ -197,24 +139,61 @@ h1, h2, h3, .main-title, .section-title {
   width: 100%;
 }
 
-/* Sections */
+.hamburger {
+  display: none;
+  cursor: pointer;
+  font-size: 2rem;
+  color: white;
+}
+
+/* Mobile Navbar */
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+
+ .nav-links {
+  visibility: hidden;
+  pointer-events: none;
+  flex-direction: column;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.95);
+  position: absolute;
+  top: 70px;
+  left: 0;
+  padding: 20px;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+}
+
+.nav-links.show {
+  visibility: visible;
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+  .nav-links a {
+    margin: 10px 0;
+    font-size: 1.2rem;
+  }
+}
+
+/* ----------------------- */
+/* Sections & Content */
+/* ----------------------- */
 .screen-section {
   background: transparent;
-  position: relative;
-  color: white;
   padding: 100px 20px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  z-index: 1;
 }
 
-
-
-
-/* Home content */
 .home-content {
   text-align: center;
   z-index: 2;
@@ -240,7 +219,6 @@ h1, h2, h3, .main-title, .section-title {
   background-color: #0a3d0a;
 }
 
-/* Scroll down arrow */
 .scroll-down {
   position: absolute;
   bottom: 20px;
@@ -254,7 +232,9 @@ h1, h2, h3, .main-title, .section-title {
   50% { transform: translateY(10px); }
 }
 
+/* ----------------------- */
 /* Team Cards */
+/* ----------------------- */
 .team-cards {
   display: flex;
   flex-wrap: wrap;
@@ -280,21 +260,19 @@ h1, h2, h3, .main-title, .section-title {
   overflow: hidden;
 }
 
+.team-card.visible {
+  opacity: 0.7;
+  transform: translateY(0);
+}
+
 .team-card:hover {
   transform: scale(1.05) translateY(0);
   box-shadow: 0 8px 20px rgba(0, 255, 64, 0.4);
   opacity: 1;
 }
 
-.team-card.visible {
-  opacity: 0.7;
-  transform: translateY(0);
-  backdrop-filter: blur(10px);
-}
-
 .team-card img {
   width: 100%;
-  height: auto;
   border-radius: 10px 10px 0 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   transition: transform 0.4s ease;
@@ -303,8 +281,6 @@ h1, h2, h3, .main-title, .section-title {
 .team-card:hover img {
   transform: scale(1.05);
 }
-
-
 
 .team-card h3,
 .team-card p,
@@ -316,7 +292,9 @@ h1, h2, h3, .main-title, .section-title {
   color: #0be333;
 }
 
+/* ----------------------- */
 /* Footer */
+/* ----------------------- */
 footer {
   text-align: center;
   padding: 20px;
@@ -324,7 +302,9 @@ footer {
   color: white;
 }
 
+/* ----------------------- */
 /* Loader */
+/* ----------------------- */
 #loader {
   position: fixed;
   top: 0;
@@ -351,133 +331,21 @@ footer {
   to { transform: rotate(360deg); }
 }
 
-/* Responsive */
+/* ----------------------- */
+/* Responsive Typography & Layout */
+/* ----------------------- */
 @media (max-width: 768px) {
-  nav ul {
-    flex-direction: column;
-    align-items: center;
-  }
+  .main-title { font-size: 2.8rem; }
+  .section-title { font-size: 2rem; }
+  .home-logo { font-size: 3rem; }
 
-  .team-cards {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .main-title {
-    font-size: 2.8rem;
-  }
-
-  .section-title {
-    font-size: 2rem;
-  }
-}
-@media (max-width: 768px) {
   .team-cards {
     flex-direction: column;
     align-items: center;
   }
 
   .team-card {
-    width: 90%; /* Make it take most of the screen on small devices */
+    width: 90%;
     max-width: 300px;
   }
-
-  .main-title {
-    font-size: 2.8rem;
-  }
-
-  .section-title {
-    font-size: 2rem;
-  }
-  .home-logo {
-  font-size: 3rem;
 }
-@media (max-width: 768px) {
-  .home-logo {
-    font-size: 3rem;
-  }
-}
-@media (max-width: 768px) {
-  .nav-links {
-    display: none;
-    flex-direction: column;
-    background: rgba(0, 0, 0, 0.9);
-    position: absolute;
-    top: 70px;
-    right: 0;
-    width: 100%;
-    text-align: center;
-  }
-
-  .nav-links a {
-    padding: 15px 0;
-    display: block;
-  }
-
-  .menu-toggle {
-    display: block;
-    font-size: 2rem;
-    color: white;
-    cursor: pointer;
-  }
-}
-
-/* Initially hidden toggle button */
-.menu-toggle {
-  display: none;
-}
-/* Responsive Navbar */
-.hamburger {
-  display: none;
-  font-size: 1.8rem;
-  color: white;
-  cursor: pointer;
-}
-
-@media (max-width: 768px) {
-  .hamburger {
-    display: block;
-  }
-
-  .nav-links {
-    position: absolute;
-    top: 80px;
-    left: 0;
-    width: 100%;
-    background-color: rgba(0, 0, 0, 0.9);
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    padding: 20px 0;
-    display: none;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-
-  .nav-links.show {
-    display: flex;
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .nav-links a {
-    margin: 10px 0;
-    font-size: 1.2rem;
-  }
-
-  .navbar {
-    flex-wrap: wrap;
-  }
-}
-
-
-
-}
-.container {
-  width: 90%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 15px;
-}
-
