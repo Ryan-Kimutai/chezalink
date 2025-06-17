@@ -25,17 +25,21 @@
   </div>
 
   <!-- Header -->
-  <header>
-    <div class="navbar">
-      <div class="logo">ぷ Cheza<span>Link</span></div>
-      <div class="nav-links">
-        <a href="#home">Home</a>
-        <a href="#about">About us</a>
-        <a href="#services">Services</a>
-        <a href="#team">Team</a>
-      </div>
+<header>
+  <div class="navbar">
+    <div class="logo">ぷ Cheza<span>Link</span></div>
+    <div class="hamburger" id="hamburger">
+      <i class="fas fa-bars"></i>
     </div>
-  </header>
+    <div class="nav-links" id="nav-links">
+      <a href="#home">Home</a>
+      <a href="#about">About us</a>
+      <a href="#services">Services</a>
+      <a href="#team">Team</a>
+    </div>
+  </div>
+</header>
+
 
   <!-- Home Section -->
   <section id="home" class="screen-section">
@@ -102,5 +106,14 @@
       mirror: true
     });
   </script>
+  <script>
+  const hamburger = document.getElementById('hamburger');
+  const navLinks = document.getElementById('nav-links');
+
+  hamburger.addEventListener('click', () => {
+    navLinks.classList.toggle('show');
+  });
+</script>
+
 </body>
 </html>
