@@ -349,3 +349,53 @@ footer {
     max-width: 300px;
   }
 }
+/*styles for the service containers*/
+#services {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.services-container {
+  display: flex;
+  flex-wrap: wrap; /* Ensures responsiveness on smaller screens */
+  justify-content: space-between;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.service-box {
+  flex: 1 1 calc(50% - 20px); /* 4 in a row with spacing */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  width: 250px;
+  height: 150px;
+  padding: 15px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  opacity: 0.9;
+  transform: translateY(0);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.service-box h3 {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.service-box p {
+  font-size: 1em;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .service-box {
+    flex: 1 1 100%; /* Stack vertically on small screens */
+  }
+}
