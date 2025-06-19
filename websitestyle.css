@@ -298,7 +298,7 @@ h1, h2, h3, .main-title, .section-title {
 footer {
   text-align: center;
   padding: 20px;
-  background: #0a3d0a;
+  background:  rgba(0, 0, 0, 0.5);
   color: white;
 }
 
