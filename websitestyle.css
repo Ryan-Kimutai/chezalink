@@ -365,14 +365,15 @@ footer {
 }
 
 .service-box {
+  position: relative; /* Ensure positioning for child elements */
   flex: 1 1 calc(50% - 20px); /* 4 in a row with spacing */
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 10px;
-  width: 250px;
-  height: 150px;
-  padding: 15px;
+  width: 200px;
+  height: 200px;
+  padding: 25px;
   text-align: center;
   color: white;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
@@ -398,4 +399,32 @@ footer {
   .service-box {
     flex: 1 1 100%; /* Stack vertically on small screens */
   }
+}
+.service-box .icon {
+  font-size: 3rem; /* Adjust icon size */
+  color: white;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.service-box .text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.service-box:hover .icon {
+  opacity: 0; /* Hide icon on hover */
+  transform: scale(0.8); /* Optional: shrink icon slightly */
+}
+
+.service-box:hover .text {
+  opacity: 1; /* Show text on hover */
+  transform: translate(-50%, -50%) scale(1); /* Reset scale */
+}
+.service-box:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
 }
