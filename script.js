@@ -8,7 +8,7 @@ const teamMembers = [
   {
     name: "Ryan Kimutai",
     role: "Project Lead/Lead Dev",
-    image: "Ryan.jpg",
+    image: "Ryan2.jpg",
     github: "https://github.com/amina",
     twitter: "https://twitter.com/amina",
     linkedin: "https://linkedin.com/in/amina"
@@ -16,7 +16,7 @@ const teamMembers = [
   {
     name: "Brian Kamau",
     role: "Backend Developer",
-    image: "Brayo.jpg",
+    image: "Brayo2.jpg",
     github: "https://github.com/brian",
     twitter: "https://twitter.com/brian",
     linkedin: "https://linkedin.com/in/brian"
@@ -24,7 +24,7 @@ const teamMembers = [
   {
     name: "Kweyah Polo",
     role: "Frontend Developer",
-    image: "Kweyah ChezaLink.jpg",
+    image: "Kweyah.jpg",
     github: "https://github.com/kweyah",
     twitter: "https://twitter.com/kweyahh",
     linkedin: "https://linkedin.com/in/faith"
@@ -40,7 +40,7 @@ const teamMembers = [
   {
     name: "Hillary Inyait",
     role: "Research and Database Management",
-    image: "Hilla.jpg",
+    image: "Hilla2.jpg",
     github: "https://github.com/lilian",
     twitter: "https://twitter.com/lilian",
     linkedin: "https://linkedin.com/in/lilian"
