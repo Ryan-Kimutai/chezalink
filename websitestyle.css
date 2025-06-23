@@ -366,7 +366,7 @@ footer {
 
 .service-box {
   position: relative; /* Ensure positioning for child elements */
-  flex: 1 1 calc(50% - 20px); /* 4 in a row with spacing */
+  flex: 1 1 calc(50% - 30px); /* 2 in a row with spacing */
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -382,6 +382,7 @@ footer {
   transform: translateY(0);
   cursor: pointer;
   overflow: hidden;
+ 
 }
 
 .service-box h3 {
@@ -418,6 +419,7 @@ footer {
 .service-box:hover .icon {
   opacity: 0; /* Hide icon on hover */
   transform: scale(0.8); /* Optional: shrink icon slightly */
+ 
 }
 
 .service-box:hover .text {
@@ -427,4 +429,5 @@ footer {
 .service-box:hover {
   transform: scale(1.05);
   transition: transform 0.3s ease;
+  box-shadow: 0 8px 20px rgba(0, 255, 64, 0.4)
 }
