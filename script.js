@@ -9,41 +9,36 @@ const teamMembers = [
     name: "Ryan Kimutai",
     role: "Project Lead/Lead Dev",
     image: "Ryan2.jpg",
-    github: "https://github.com/amina",
-    twitter: "https://twitter.com/amina",
+    github: "https://github.com/Ryan-Kimutai",
     linkedin: "https://linkedin.com/in/amina"
   },
   {
     name: "Brian Kamau",
     role: "Backend Developer",
     image: "Brayo2.jpg",
-    github: "https://github.com/brian",
-    twitter: "https://twitter.com/brian",
-    linkedin: "https://linkedin.com/in/brian"
+    github: "https://github.com/collosalsteppa",
+    linkedin: "https://www.linkedin.com/in/brian-kamau-692575371/"
   },
   {
     name: "Kweyah Polo",
     role: "Frontend Developer",
     image: "Kweyah.jpg",
     github: "https://github.com/kweyah",
-    twitter: "https://twitter.com/kweyahh",
-    linkedin: "https://linkedin.com/in/faith"
+    linkedin: "https://www.linkedin.com/in/kweyah-polo-674a99175/"
   },
   {
     name: "Joshua Muimi",
     role: "UI/UX Designer",
     image: "Joshu.jpg",
-    github: "https://github.com/kevin",
-    twitter: "https://twitter.com/kevin",
-    linkedin: "https://linkedin.com/in/kevin"
+    github: "https://github.com/SaintMuimi",
+    linkedin: "https://www.linkedin.com/in/josh-gamer-7aa777305/"
   },
   {
     name: "Hillary Inyait",
     role: "Research and Database Management",
     image: "Hilla2.jpg",
-    github: "https://github.com/lilian",
-    twitter: "https://twitter.com/lilian",
-    linkedin: "https://linkedin.com/in/lilian"
+    github: "https://github.com/HillaryInyait",
+    linkedin: "http://www.linkedin.com/in/hillary-inyait"
   }
 ];
 
@@ -60,7 +55,7 @@ teamMembers.forEach(member => {
     <p>${member.role}</p>
     <div class="social-links">
       <a href="${member.github}" target="_blank"><i class="fab fa-github"></i></a>
-      <a href="${member.twitter}" target="_blank"><i class="fab fa-twitter"></i></a>
+      
       <a href="${member.linkedin}" target="_blank"><i class="fab fa-linkedin"></i></a>
     </div>
   `;
