@@ -5,9 +5,6 @@ on:
     branches:
       - production
 
-  # schedule:
-  #   - cron: '0 0 0 * *' # Uncomment to schedule the workflow
-
   pull_request:
     branches:
       - production
@@ -31,12 +28,17 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Convert image name to lowercase
+        run: |
+          IMAGE_REPO="${{ secrets.DOCKER_USERNAME }}/$(echo 'chezalink' | tr '[:upper:]' '[:lower:]')"
+          echo "IMAGE_NAME=$IMAGE_REPO" >> $GITHUB_ENV
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: ./
+          context: ./website/
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:${{ github.sha }}, ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}, ${{ env.IMAGE_NAME }}:latest
 
       - name: Set up SSH
         run: |
@@ -46,5 +48,5 @@ jobs:
           ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
       - name: Deploy to production server
-        run:
+        run: |
           ssh ${{ secrets.SERVER_BOT }}@${{ secrets.SERVER_IP }} "~/deploy.sh"
