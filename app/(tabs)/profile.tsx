@@ -1,92 +1,123 @@
-// ✅ app/(tabs)/profile.tsx - Profile Screen
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const mockSavedPlayers = [
-  {
-    id: '1',
-    name: 'Faith Wanjiku',
-    sport: 'Athletics - Sprinter',
-    image: require('../../assets/aisha.jpg'),
-  },
-  {
-    id: '2',
-    name: 'Collins Kipkoech',
-    sport: 'Rugby - Winger',
-    image: require('../../assets/noni.jpg'),
-  },
-];
+const profileData = {
+  username: 'aisha_wambua',
+  fullName: 'Aisha Wambua',
+  bio: '100m Sprinter 🇰🇪 | Kenya Junior Team',
+  profilePic: require('../../assets/profile2.jpg'),
+  followers: 1200,
+  following: 180,
+  posts: [
+    require('../../assets/aisha1.jpg'),
+    require('../../assets/aisha2.jpg'),
+    require('../../assets/aisha3.jpg'),
+  ],
+};
 
 export default function ProfileScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Your Profile</Text>
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Image source={profileData.profilePic} style={styles.avatar} />
+        <Text style={styles.username}>@{profileData.username}</Text>
+        <Text style={styles.fullName}>{profileData.fullName}</Text>
+        <Text style={styles.bio}>{profileData.bio}</Text>
 
-      <FlatList
-        data={mockSavedPlayers}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Image source={item.image} style={styles.image} />
-            <View style={styles.info}>
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.sport}>{item.sport}</Text>
-              <TouchableOpacity>
-                <Text style={styles.link}>View Profile</Text>
-              </TouchableOpacity>
-            </View>
+        <View style={styles.stats}>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>{profileData.followers}</Text>
+            <Text style={styles.statLabel}>Followers</Text>
           </View>
-        )}
-        ListEmptyComponent={<Text style={styles.empty}>You haven't saved any players yet.</Text>}
-      />
-    </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>{profileData.following}</Text>
+            <Text style={styles.statLabel}>Following</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity style={styles.editButton}>
+          <Text style={styles.editButtonText}>Edit Profile</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.gallery}>
+        {profileData.posts.map((img, idx) => (
+          <Image key={idx} source={img} style={styles.postImage} />
+        ))}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingTop: 60,
+  container: { flex: 1, backgroundColor: '#fff' },
+  header: {
+    alignItems: 'center',
+    paddingTop: 50,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1db954',
-    marginBottom: 20,
-  },
-  card: {
-    flexDirection: 'row',
-    backgroundColor: '#f9f9f9',
-    marginBottom: 16,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  image: {
+  avatar: {
     width: 100,
     height: 100,
+    borderRadius: 50,
+    marginBottom: 10,
   },
-  info: {
-    flex: 1,
-    padding: 12,
-    justifyContent: 'center',
-  },
-  name: {
+  username: {
     fontSize: 16,
-    fontWeight: 'bold',
-  },
-  sport: {
-    fontSize: 14,
+    fontWeight: '600',
     color: '#666',
-    marginVertical: 4,
   },
-  link: {
-    color: '#1db954',
+  fullName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#111',
+    marginTop: 4,
+  },
+  bio: {
+    fontSize: 14,
+    color: '#444',
+    textAlign: 'center',
+    paddingHorizontal: 40,
+    marginTop: 6,
+  },
+  stats: {
+    flexDirection: 'row',
+    marginTop: 20,
+    gap: 40,
+  },
+  statBox: {
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#777',
+  },
+  editButton: {
+    marginTop: 20,
+    backgroundColor: '#1db954',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  editButtonText: {
+    color: '#fff',
     fontWeight: '600',
   },
-  empty: {
-    textAlign: 'center',
-    color: '#888',
-    marginTop: 50,
+  gallery: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  postImage: {
+    width: '32%',
+    aspectRatio: 1,
+    borderRadius: 8,
+    marginBottom: 10,
   },
 });

@@ -1,85 +1,145 @@
-// ✅ app/view/[id].tsx - View Profile Screen (mocked)
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-export default function ViewProfileScreen() {
-  const { id } = useLocalSearchParams();
-  const router = useRouter();
+const mockProfiles = {
+  '1': {
+    username: 'noni_madueke',
+    fullName: 'Noni Madueke',
+    profilePic: require('../../assets/profile1.jpg'),
+    bio: 'Left winger • England U21 ⚽',
+    sport: 'Football',
+    country: 'England',
+    videos: [require('../../assets/noni.mp4')],
+  },
+  '2': {
+    username: 'aisha_wambua',
+    fullName: 'Aisha Wambua',
+    profilePic: require('../../assets/profile2.jpg'),
+    bio: '100m Sprinter 🇰🇪 | Kenya Junior Team',
+    sport: 'Athletics',
+    country: 'Kenya',
+    videos: [],
+  },
+};
 
-  // Mock profile data (in future, fetch from backend using ID)
-  const profile = {
-    id,
-    name: 'Brian Otieno',
-    image: require('../../assets/noni.jpg'),
-    sport: 'Football - Striker',
-    location: 'Kibera, Nairobi',
-    bio: 'Fast and strategic striker with vision. Played for multiple local teams and looking to join a national-level academy.',
-  };
+export default function ViewProfile() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const profile = mockProfiles[id as keyof typeof mockProfiles];
+
+
+  if (!profile) {
+    return (
+      <View style={styles.center}>
+        <Text>User not found.</Text>
+      </View>
+    );
+  }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Image source={profile.image} style={styles.image} />
-
-      <View style={styles.content}>
-        <Text style={styles.name}>{profile.name}</Text>
-        <Text style={styles.sport}>{profile.sport}</Text>
-        <Text style={styles.location}>{profile.location}</Text>
-
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Image source={profile.profilePic} style={styles.avatar} />
+        <Text style={styles.username}>@{profile.username}</Text>
+        <Text style={styles.fullName}>{profile.fullName}</Text>
         <Text style={styles.bio}>{profile.bio}</Text>
+        <Text style={styles.details}>
+          Sport: <Text style={styles.bold}>{profile.sport}</Text> | Country: <Text style={styles.bold}>{profile.country}</Text>
+        </Text>
 
-        <TouchableOpacity
-          style={styles.followButton}
-          onPress={() => alert('Login to follow players.')}
-        >
-          <Text style={styles.followText}>Follow</Text>
+        <TouchableOpacity style={styles.followButton}>
+          <Text style={styles.followButtonText}>Follow</Text>
         </TouchableOpacity>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Highlights</Text>
+        {profile.videos.length > 0 ? (
+          profile.videos.map((vid, idx) => (
+            <Text key={idx} style={styles.videoPlaceholder}>🎥 Video {idx + 1}</Text>
+            // You can replace with <Video> if needed
+          ))
+        ) : (
+          <Text style={styles.noContent}>No videos yet.</Text>
+        )}
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingBottom: 40,
-    backgroundColor: '#fff',
-  },
-  image: {
-    width: '100%',
-    height: 280,
-  },
-  content: {
-    padding: 20,
-  },
-  name: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  sport: {
-    fontSize: 16,
-    color: '#1db954',
-    marginBottom: 4,
-  },
-  location: {
-    fontSize: 14,
-    color: '#777',
-    marginBottom: 16,
-  },
-  bio: {
-    fontSize: 16,
-    lineHeight: 22,
-    color: '#333',
-    marginBottom: 24,
-  },
-  followButton: {
-    backgroundColor: '#1db954',
-    paddingVertical: 14,
-    borderRadius: 10,
+  container: { flex: 1, backgroundColor: '#fff' },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  followText: {
+  header: {
+    alignItems: 'center',
+    paddingTop: 50,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 10,
+  },
+  username: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+  },
+  fullName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#111',
+    marginTop: 4,
+  },
+  bio: {
+    fontSize: 14,
+    color: '#444',
+    textAlign: 'center',
+    paddingHorizontal: 40,
+    marginTop: 6,
+  },
+  details: {
+    marginTop: 10,
+    fontSize: 13,
+    color: '#555',
+  },
+  bold: {
+    fontWeight: 'bold',
+    color: '#1db954',
+  },
+  followButton: {
+    marginTop: 16,
+    backgroundColor: '#1db954',
+    paddingVertical: 8,
+    paddingHorizontal: 24,
+    borderRadius: 20,
+  },
+  followButtonText: {
     color: '#fff',
     fontWeight: '600',
+  },
+  section: {
+    padding: 20,
+  },
+  sectionTitle: {
     fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  videoPlaceholder: {
+    backgroundColor: '#eee',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  noContent: {
+    color: '#777',
+    fontStyle: 'italic',
   },
 });

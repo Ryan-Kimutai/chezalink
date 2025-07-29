@@ -1,98 +1,100 @@
-// ✅ app/(tabs)/new.tsx - Create New Post
+import { ResizeMode, Video } from 'expo-av';
+import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import {
-  Alert,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function NewPostScreen() {
-  const [name, setName] = useState('');
-  const [sport, setSport] = useState('');
-  const [description, setDescription] = useState('');
+  const [media, setMedia] = useState<{ uri: string; type: 'image' | 'video' } | null>(null);
+  const router = useRouter();
 
-  const handlePost = () => {
-    if (!name || !sport || !description) {
-      Alert.alert('Missing fields', 'Please fill out all fields.');
+  const pickMedia = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission needed', 'Camera roll access is required!');
       return;
     }
 
-    // For now, just simulate a post submission
-    Alert.alert('Posted!', `Submitted profile for ${name}`);
-    setName('');
-    setSport('');
-    setDescription('');
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      const asset = result.assets[0];
+      const type = asset.type === 'video' ? 'video' : 'image';
+      setMedia({ uri: asset.uri, type });
+    }
+  };
+
+  const handlePost = () => {
+    if (!media) return Alert.alert('No media selected');
+    Alert.alert('Posted!', 'Your content has been uploaded.');
+    setMedia(null);
+    router.push('/');
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Create New Post</Text>
+      <Text style={styles.title}>Create a New Post</Text>
 
-      <TextInput
-        placeholder="Player Name"
-        value={name}
-        onChangeText={setName}
-        style={styles.input}
-      />
+      <TouchableOpacity onPress={pickMedia} style={styles.mediaButton}>
+        <Text style={styles.mediaButtonText}>Select Image or Video</Text>
+      </TouchableOpacity>
 
-      <TextInput
-        placeholder="Sport / Position"
-        value={sport}
-        onChangeText={setSport}
-        style={styles.input}
-      />
+      {media && (
+        <View style={styles.preview}>
+          {media.type === 'image' ? (
+            <Image source={{ uri: media.uri }} style={styles.media} />
+          ) : (
+            <Video
+              source={{ uri: media.uri }}
+              style={styles.media}
+              resizeMode={ResizeMode.COVER}
+              useNativeControls
+              isLooping
+            />
+          )}
+        </View>
+      )}
 
-      <TextInput
-        placeholder="Short Description"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        numberOfLines={4}
-        style={[styles.input, { height: 100 }]}
-      />
-
-      <TouchableOpacity style={styles.button} onPress={handlePost}>
-        <Text style={styles.buttonText}>Post</Text>
+      <TouchableOpacity onPress={handlePost} style={styles.postButton}>
+        <Text style={styles.postButtonText}>Post</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingTop: 60,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1db954',
-    marginBottom: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    backgroundColor: '#f9f9f9',
-    padding: 12,
-    borderRadius: 10,
-    fontSize: 16,
-    marginBottom: 16,
-  },
-  button: {
-    backgroundColor: '#1db954',
-    paddingVertical: 14,
+  container: { flex: 1, paddingTop: 60, paddingHorizontal: 20, backgroundColor: '#fff' },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, color: '#1db954', textAlign: 'center' },
+  mediaButton: {
+    backgroundColor: '#eee',
+    padding: 14,
     borderRadius: 10,
     alignItems: 'center',
-    marginTop: 10,
   },
-  buttonText: {
+  mediaButtonText: {
+    fontWeight: '600',
+    color: '#333',
+  },
+  preview: {
+    marginVertical: 20,
+    alignItems: 'center',
+  },
+  media: {
+    width: '100%',
+    height: 300,
+    borderRadius: 12,
+  },
+  postButton: {
+    backgroundColor: '#1db954',
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  postButtonText: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 16,
   },
 });
