@@ -1,4 +1,6 @@
+// ✅ app/(tabs)/tournaments.tsx
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import { router } from 'expo-router';
 import React from 'react';
 import {
   Image,
@@ -38,8 +40,7 @@ export default function TournamentsScreen() {
   ];
 
   const handleAddTournament = () => {
-    console.log('Add tournament button pressed');
-    // Navigation or modal logic can go here
+    router.push('/(modals)/add-tournament');
   };
 
   return (
@@ -50,13 +51,20 @@ export default function TournamentsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {tournaments.map((item) => (
-          <View key={item.id} style={styles.shadowBox}>
-            <Image source={{ uri: item.image }} style={styles.image} />
-            <Text style={styles.name}>{item.name}</Text>
-            <Text style={styles.detail}>📅 {item.date}</Text>
-            <Text style={styles.detail}>📍 {item.location}</Text>
-            <Text style={styles.detail}>🧑 {item.owner}</Text>
-          </View>
+          <TouchableOpacity
+            key={item.id}
+            onPress={() =>
+              router.push(`/(modals)/view-tournament/${item.id}` as any)
+            }
+          >
+            <View style={styles.shadowBox}>
+              <Image source={{ uri: item.image }} style={styles.image} />
+              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.detail}>📅 {item.date}</Text>
+              <Text style={styles.detail}>📍 {item.location}</Text>
+              <Text style={styles.detail}>🧑 {item.owner}</Text>
+            </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
 
@@ -64,13 +72,14 @@ export default function TournamentsScreen() {
       <TouchableOpacity
         style={styles.fab}
         onPress={handleAddTournament}
-        activeOpacity={0}
+        activeOpacity={0.7}
       >
         <FontAwesome6 name="plus" size={24} color="black" />
       </TouchableOpacity>
     </View>
   );
-};
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -80,15 +89,6 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingBottom: 20,
-  },
-  text: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  matchText: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
   },
   title: {
     fontSize: 26,
@@ -108,8 +108,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
-    elevation: 2
-    ,
+    elevation: 2,
   },
   image: {
     width: '100%',
@@ -141,4 +140,3 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
 });
-
