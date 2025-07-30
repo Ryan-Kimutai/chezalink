@@ -19,14 +19,14 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Missing Fields', 'Please enter both email and password.');
+      Alert.alert('Missing Fields', 'Please fill in all fields.');
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch('http://192.168.0.103:3000/api/login', {
+      const response = await fetch('http://172.20.10.14:5000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,15 +38,13 @@ export default function LoginScreen() {
 
       if (response.ok) {
         await SecureStore.setItemAsync('token', data.token);
-        // You can also store user data if needed:
-        // await SecureStore.setItemAsync('user', JSON.stringify(data.user));
-        router.replace('/(tabs)');
+        router.replace('/(tabs)'); // Redirect to main app layout
       } else {
-        Alert.alert('Login Failed', data.message || 'Invalid credentials');
+        Alert.alert('Login Failed', data.message || 'Invalid credentials.');
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      Alert.alert('Error', 'Something went wrong. Please try again later.');
+    } catch (err) {
+      console.error('Login Error:', err);
+      Alert.alert('Error', 'Something went wrong. Try again.');
     } finally {
       setLoading(false);
     }
@@ -55,21 +53,22 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome Back</Text>
-      <Text style={styles.subtitle}>Log in to your ChezaLink account</Text>
+      <Text style={styles.subtitle}>Login to your ChezaLink account</Text>
 
       <TextInput
+        style={styles.input}
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
-        style={styles.input}
         keyboardType="email-address"
         autoCapitalize="none"
       />
+
       <TextInput
+        style={styles.input}
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
-        style={styles.input}
         secureTextEntry
       />
 
@@ -82,23 +81,28 @@ export default function LoginScreen() {
       </TouchableOpacity>
 
       <Text style={styles.link} onPress={() => router.push('/register')}>
-        Don't have an account? <Text style={styles.linkBold}>Register</Text>
+        Don’t have an account? <Text style={styles.linkBold}>Register</Text>
       </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#fff' },
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
   title: { fontSize: 28, fontWeight: 'bold', marginBottom: 8 },
-  subtitle: { fontSize: 16, color: '#555', marginBottom: 20 },
+  subtitle: { fontSize: 16, color: '#666', marginBottom: 20 },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 15,
     backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 15,
   },
   button: {
     backgroundColor: '#1db954',
@@ -107,7 +111,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  link: { marginTop: 20, textAlign: 'center', color: '#555' },
+  buttonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
+  link: { marginTop: 20, color: '#555', textAlign: 'center' },
   linkBold: { color: '#1db954', fontWeight: '600' },
 });

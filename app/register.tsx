@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -27,7 +26,7 @@ export default function RegisterScreen() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://192.168.0.103:5000/api/signup', {
+      const response = await fetch('http://172.20.10.14:5000/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,13 +37,13 @@ export default function RegisterScreen() {
       const data = await response.json();
 
       if (response.ok) {
-        await SecureStore.setItemAsync('token', data.token);
-        router.replace('/(tabs)');
+        Alert.alert('Success', 'Account created! Please log in.');
+        router.replace('/login'); // go to login page after successful signup
       } else {
-        Alert.alert('Registration Failed', data.message || 'Could not register.');
+        Alert.alert('Registration Failed', data.message || 'Unable to register. Try again.');
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
@@ -67,8 +66,8 @@ export default function RegisterScreen() {
         value={email}
         onChangeText={setEmail}
         style={styles.input}
-        keyboardType="email-address"
         autoCapitalize="none"
+        keyboardType="email-address"
       />
       <TextInput
         placeholder="Password"
@@ -91,20 +90,14 @@ export default function RegisterScreen() {
       </TouchableOpacity>
 
       <Text style={styles.link} onPress={() => router.push('/login')}>
-        Already have an account?{' '}
-        <Text style={styles.linkBold}>Login</Text>
+        Already have an account? <Text style={styles.linkBold}>Login</Text>
       </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-  },
+  container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#fff' },
   title: { fontSize: 28, fontWeight: 'bold', marginBottom: 8 },
   subtitle: { fontSize: 16, color: '#555', marginBottom: 20 },
   input: {
