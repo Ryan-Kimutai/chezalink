@@ -11,13 +11,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Import routes
+// Import routes
 const authRoutes = require('./routes/auth.routes');
-const protectedRoutes = require('./routes/protected.routes'); // ⬅️ Add this line
+const protectedRoutes = require('./routes/protected.routes'); 
 
-// ✅ Mount routes
+// Mount routes
 app.use('/api/auth', authRoutes);
-app.use('/api/protected', protectedRoutes); // ⬅️ Add this line
+app.use('/api/protected', protectedRoutes); 
 
 // Root test route
 app.get('/', (req, res) => {

@@ -10,13 +10,13 @@ const generateToken = (user) => {
   return jwt.sign(
     { id: user.id, email: user.email },  // Payload to encode in token
     process.env.JWT_SECRET,             // Secret key to sign the token
-    { expiresIn: '1h' }                 // Token expires in 1 hour
+    { expiresIn: '1w' }                 // Token expires in 1 week temporarily will change back to an 1hr later
   );
 };
 
 // Controller for user signup
 const signup = async (req, res) => {
-  const { username, email, password } = req.body; // Get user input
+  const { name, email, password } = req.body; // Get user input
 
   // Check if the email is already registered
   const userExists = users.find((user) => user.email === email);
@@ -32,7 +32,7 @@ const signup = async (req, res) => {
     // Create new user object with hashed password
     const newUser = {
       id: Date.now(),
-      username,
+      name,
       email,
       password: hashedPassword
     };
@@ -48,7 +48,7 @@ const signup = async (req, res) => {
       message: 'User created',
       user: {
         id: newUser.id,
-        username: newUser.username,
+        name: newUser.name,
         email: newUser.email
       },
       token
@@ -84,7 +84,7 @@ const login = async (req, res) => {
       message: 'Login successful',
       user: {
         id: user.id,
-        username: user.username,
+        name: user.name,
         email: user.email
       },
       token
@@ -95,9 +95,16 @@ const login = async (req, res) => {
   }
 };
 
+// Controller to list all users (excluding passwords)TEMPORARY FOR TESTING
+const getAllUsers = (req, res) => {
+  const usersWithoutPasswords = users.map(({ password, ...rest }) => rest);
+  res.json(usersWithoutPasswords);
+};
 // Export the controller functions
 module.exports = {
   signup,
   login,
+  getAllUsers,
+  users  // export users array for inspection (for testing only)
 };
 

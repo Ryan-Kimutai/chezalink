@@ -1,14 +1,12 @@
-// routes/auth.routes.js
-
 const express = require('express');
 const router = express.Router();
 
 // Import controller functions
-const { signup, login } = require('../controllers/auth.controller');
+const { signup, login, getAllUsers } = require('../controllers/auth.controller');
 
-// Define routes
-router.post('/signup', signup); // when POST /signup is called, run signup controller
-router.post('/login', login);   // when POST /login is called, run login controller
+// Routes
+router.get('/users', getAllUsers);     // Get all users (testing only)
+router.post('/signup', signup);        // Register a new user
+router.post('/login', login);          // Log in a user
 
 module.exports = router;
-// Export the router to use in server.js
