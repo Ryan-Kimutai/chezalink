@@ -2,11 +2,23 @@ import { ResizeMode, Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function NewPostScreen() {
   const [media, setMedia] = useState<{ uri: string; type: 'image' | 'video' } | null>(null);
+  const [caption, setCaption] = useState('');
+  const [uploading, setUploading] = useState(false);
   const router = useRouter();
+
+  const userId = 'user123'; // 🔁 Replace with real user ID
 
   const pickMedia = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -27,11 +39,59 @@ export default function NewPostScreen() {
     }
   };
 
-  const handlePost = () => {
+  const handlePost = async () => {
     if (!media) return Alert.alert('No media selected');
-    Alert.alert('Posted!', 'Your content has been uploaded.');
-    setMedia(null);
-    router.push('/');
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      const fileField = {
+        uri: media.uri,
+        name: media.uri.split('/').pop() || 'media',
+        type: media.type === 'video' ? 'video/mp4' : 'image/jpeg',
+      };
+
+      formData.append(media.type, fileField as any);
+
+      const uploadRes = await fetch(
+        `http://localhost:3000/api/posts/upload-${media.type}`,
+        {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      const uploadData = await uploadRes.json();
+      const mediaUrl = media.type === 'video' ? uploadData.videoUrl : uploadData.imageUrl;
+
+      // Save post
+      const postPayload = {
+        userId,
+        type: media.type,
+        content: caption,
+        videoUrl: media.type === 'video' ? mediaUrl : '',
+        imageUrl: media.type === 'image' ? mediaUrl : '',
+      };
+
+      await fetch('http://localhost:3000/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(postPayload),
+      });
+
+      Alert.alert('Success', 'Your post has been uploaded.');
+      setMedia(null);
+      setCaption('');
+      router.push('/');
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error', 'Upload failed. Try again.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -58,8 +118,18 @@ export default function NewPostScreen() {
         </View>
       )}
 
-      <TouchableOpacity onPress={handlePost} style={styles.postButton}>
-        <Text style={styles.postButtonText}>Post</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Write a caption..."
+        value={caption}
+        onChangeText={setCaption}
+        multiline
+      />
+
+      <TouchableOpacity onPress={handlePost} style={styles.postButton} disabled={uploading}>
+        <Text style={styles.postButtonText}>
+          {uploading ? 'Uploading...' : 'Post'}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -74,18 +144,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
   },
-  mediaButtonText: {
-    fontWeight: '600',
-    color: '#333',
-  },
-  preview: {
-    marginVertical: 20,
-    alignItems: 'center',
-  },
-  media: {
-    width: '100%',
-    height: 300,
-    borderRadius: 12,
+  mediaButtonText: { fontWeight: '600', color: '#333' },
+  preview: { marginVertical: 20, alignItems: 'center' },
+  media: { width: '100%', height: 300, borderRadius: 12 },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 16,
+    textAlignVertical: 'top',
+    height: 80,
   },
   postButton: {
     backgroundColor: '#1db954',
@@ -93,8 +162,5 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
   },
-  postButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
+  postButtonText: { color: '#fff', fontWeight: '600' },
 });

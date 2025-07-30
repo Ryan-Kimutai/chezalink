@@ -1,37 +1,49 @@
-// app/(tabs)/index.tsx
 import { ResizeMode, Video } from 'expo-av';
-import { useCallback, useState } from 'react';
-import { Image, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  Image,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
-const posts = [
-  {
-    id: '1',
-    username: 'noni_madueke',
-    profilePic: require('../../assets/profile1.jpg'),
-    video: require('../../assets/noni.mp4'),
-    caption: 'Great goal in training today ⚽️🔥',
-    likes: 120,
-    comments: 34,
-  },
-  {
-    id: '2',
-    username: 'aisha_wambua',
-    profilePic: require('../../assets/profile2.jpg'),
-    video: require('../../assets/aisha.mp4'),
-    caption: 'Speed day 💨🇰🇪',
-    likes: 98,
-    comments: 17,
-  },
-];
+type Post = {
+  id: string;
+  userId: string;
+  type: 'video' | 'image' | 'blog';
+  content: string;
+  videoUrl?: string;
+  imageUrl?: string;
+  likes: number;
+  comments?: number;
+  createdAt: string;
+};
+
+const userId = 'user123'; // 🔁 Replace with real user logic
 
 export default function HomeScreen() {
+  const [posts, setPosts] = useState<Post[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  const fetchFeed = async () => {
+    try {
+      const res = await fetch(`http://localhost:3000/api/posts/feed/${userId}`);
+      const data = await res.json();
+      setPosts(data);
+    } catch (error) {
+      console.error('Error fetching feed:', error);
+    }
+  };
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1500);
+    fetchFeed().finally(() => setRefreshing(false));
+  }, []);
+
+  useEffect(() => {
+    fetchFeed();
   }, []);
 
   return (
@@ -39,7 +51,6 @@ export default function HomeScreen() {
       style={styles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.logo}>
           ぷ Cheza
@@ -49,26 +60,35 @@ export default function HomeScreen() {
 
       {posts.map((post) => (
         <View key={post.id} style={styles.post}>
-          <View style={styles.userRow}>
-            <Image source={post.profilePic} style={styles.avatar} />
-            <Text style={styles.username}>{post.username}</Text>
-          </View>
+          <Text style={styles.username}>@{post.userId}</Text>
 
-          <Video
-            source={post.video}
-            style={styles.video}
-            resizeMode={ResizeMode.COVER}
-            useNativeControls
-            isLooping
-          />
+          {post.type === 'video' && post.videoUrl && (
+            <Video
+              source={{ uri: post.videoUrl }}
+              style={styles.video}
+              resizeMode={ResizeMode.COVER}
+              useNativeControls
+              isLooping
+            />
+          )}
+
+          {post.type === 'image' && post.imageUrl && (
+            <Image source={{ uri: post.imageUrl }} style={styles.video} />
+          )}
+
+          {post.type === 'blog' && (
+            <Text style={styles.blogContent}>{post.content}</Text>
+          )}
 
           <View style={styles.actions}>
             <Text>♥ {post.likes}</Text>
-            <Text>💬 {post.comments}</Text>
+            <Text>💬 0</Text>
             <Text>🔗</Text>
           </View>
 
-          <Text style={styles.caption}>{post.caption}</Text>
+          {post.content && post.type !== 'blog' && (
+            <Text style={styles.caption}>{post.content}</Text>
+          )}
         </View>
       ))}
     </ScrollView>
@@ -76,7 +96,11 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#fff',
+  },
   header: {
     paddingTop: 50,
     paddingBottom: 12,
@@ -95,26 +119,21 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     paddingHorizontal: 16,
   },
-  userRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    marginRight: 10,
-  },
   username: {
     fontWeight: 'bold',
     fontSize: 16,
+    marginBottom: 8,
   },
   video: {
     width: '100%',
     height: 300,
     borderRadius: 12,
     marginBottom: 10,
+  },
+  blogContent: {
+    fontSize: 16,
+    lineHeight: 22,
+    marginVertical: 10,
   },
   actions: {
     flexDirection: 'row',

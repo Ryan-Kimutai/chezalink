@@ -1,31 +1,54 @@
-import { useRouter } from 'expo-router';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { router } from 'expo-router';
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function SettingsScreen() {
-  const router = useRouter();
+  const confirmLogout = () => {
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: () => router.replace('/login'),
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Settings</Text>
 
-      <TouchableOpacity onPress={() => router.push('/settings/account')}>
-        <Text style={styles.item}>Account</Text>
+      <TouchableOpacity style={styles.item} onPress={() => router.push('/(modals)/settings/account')}>
+        <Text style={styles.itemText}>Account</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push('/settings/privacy')}>
-        <Text style={styles.item}>Privacy</Text>
+      <TouchableOpacity style={styles.item} onPress={() => router.push('/(modals)/settings/privacy')}>
+        <Text style={styles.itemText}>Privacy</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push('/settings/notifications')}>
-        <Text style={styles.item}>Notifications</Text>
+      <TouchableOpacity style={styles.item} onPress={() => router.push('/(modals)/settings/notifications')}>
+        <Text style={styles.itemText}>Notifications</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push('/settings/help')}>
-        <Text style={styles.item}>Help</Text>
+      <TouchableOpacity style={styles.item} onPress={() => router.push('/(modals)/settings/help')}>
+        <Text style={styles.itemText}>Help</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => alert('Logged out')}>
-        <Text style={[styles.item, { color: '#e53935' }]}>Log Out</Text>
+      <TouchableOpacity style={[styles.item, styles.logout]} onPress={confirmLogout}>
+        <Text style={[styles.itemText, styles.logoutText]}>Log Out</Text>
       </TouchableOpacity>
     </View>
   );
@@ -33,18 +56,31 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 40,
+    marginTop: 60,
     paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    flex: 1,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 24,
     color: '#1db954',
   },
   item: {
+    paddingVertical: 16,
+    borderBottomColor: '#eee',
+    borderBottomWidth: 1,
+  },
+  itemText: {
     fontSize: 16,
-    marginBottom: 16,
     color: '#333',
+  },
+  logout: {
+    marginTop: 40,
+  },
+  logoutText: {
+    color: '#d9534f',
+    fontWeight: 'bold',
   },
 });
