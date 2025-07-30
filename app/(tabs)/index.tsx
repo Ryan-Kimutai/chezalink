@@ -42,7 +42,7 @@ export default function HomeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.logo}>
-          Cheza
+          ぷ Cheza
           <Text style={{ color: '#000' }}>Link</Text>
         </Text>
       </View>
