@@ -1,9 +1,12 @@
+// ✅ app/(tabs)/profile.tsx
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const profileData = {
   username: 'aisha_wambua',
   fullName: 'Aisha Wambua',
-  bio: '100m Sprinter 🇰🇪 | Kenya Junior Team',
+  bio: 'Barcelona Femini 🇰🇪 | Kenya Junior Team',
   profilePic: require('../../assets/profile2.jpg'),
   followers: 1200,
   following: 180,
@@ -15,8 +18,22 @@ const profileData = {
 };
 
 export default function ProfileScreen() {
+  const router = useRouter();
+
   return (
     <ScrollView style={styles.container}>
+      <View style={styles.topIcons}>
+        <TouchableOpacity onPress={() => router.push({ pathname: '/(modals)/notifications' })}>
+          <Ionicons name="notifications-outline" size={24} color="#1db954" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => router.push({ pathname: '/(modals)/settings' })}
+          style={{ marginLeft: 16 }}
+        >
+          <Ionicons name="settings-outline" size={24} color="#1db954" />
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.header}>
         <Image source={profileData.profilePic} style={styles.avatar} />
         <Text style={styles.username}>@{profileData.username}</Text>
@@ -50,10 +67,15 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
+  topIcons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingTop: 50,
+    paddingHorizontal: 16,
+  },
   header: {
     alignItems: 'center',
-    paddingTop: 50,
-    paddingBottom: 20,
+    paddingVertical: 20,
     borderBottomWidth: 1,
     borderColor: '#eee',
   },

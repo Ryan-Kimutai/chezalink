@@ -1,6 +1,7 @@
-// ✅ app/(tabs)/index.tsx
+// app/(tabs)/index.tsx
 import { ResizeMode, Video } from 'expo-av';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Image, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 const posts = [
   {
@@ -24,22 +25,35 @@ const posts = [
 ];
 
 export default function HomeScreen() {
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1500);
+  }, []);
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+    >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.logo}>ChezaLink</Text>
+        <Text style={styles.logo}>
+          Cheza
+          <Text style={{ color: '#000' }}>Link</Text>
+        </Text>
       </View>
 
       {posts.map((post) => (
         <View key={post.id} style={styles.post}>
-          {/* User Info */}
           <View style={styles.userRow}>
             <Image source={post.profilePic} style={styles.avatar} />
             <Text style={styles.username}>{post.username}</Text>
           </View>
 
-          {/* Video */}
           <Video
             source={post.video}
             style={styles.video}
@@ -48,14 +62,12 @@ export default function HomeScreen() {
             isLooping
           />
 
-          {/* Actions */}
           <View style={styles.actions}>
             <Text>♥ {post.likes}</Text>
             <Text>💬 {post.comments}</Text>
             <Text>🔗</Text>
           </View>
 
-          {/* Caption */}
           <Text style={styles.caption}>{post.caption}</Text>
         </View>
       ))}
@@ -74,8 +86,10 @@ const styles = StyleSheet.create({
   },
   logo: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '900',
+    letterSpacing: 0.5,
     color: '#1db954',
+    fontFamily: 'sans-serif-condensed',
   },
   post: {
     marginBottom: 30,

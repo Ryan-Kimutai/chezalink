@@ -1,4 +1,3 @@
-// ✅ app/(tabs)/_layout.tsx
 import { Ionicons } from '@expo/vector-icons';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Tabs } from 'expo-router';
@@ -10,7 +9,7 @@ export default function TabLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Tabs
-        screenOptions={{
+        screenOptions={({ route }) => ({
           headerShown: false,
           tabBarActiveTintColor: '#1db954',
           tabBarInactiveTintColor: '#999',
@@ -22,53 +21,50 @@ export default function TabLayout() {
             paddingTop: 6,
             height: 60,
           },
-        }}
+          tabBarLabel:
+            route.name === 'index'
+              ? 'Home'
+              : route.name === 'search'
+              ? 'Search'
+              : route.name === 'new'
+              ? 'New'
+              : route.name === 'tournaments'
+              ? 'Tournaments'
+              : route.name === 'profile'
+              ? 'Profile'
+              : '',
+          tabBarIcon: ({ color, size }) => {
+            let iconName: keyof typeof Ionicons.glyphMap;
+
+            switch (route.name) {
+              case 'index':
+                iconName = 'home';
+                break;
+              case 'search':
+                iconName = 'search';
+                break;
+              case 'new':
+                iconName = 'add-circle';
+                break;
+              case 'tournaments':
+                iconName = 'football';
+                break;
+              case 'profile':
+                iconName = 'person';
+                break;
+              default:
+                iconName = 'ellipse';
+            }
+
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+        })}
       >
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: 'Home',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="home" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="search"
-          options={{
-            title: 'Search',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="search" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="new"
-          options={{
-            title: 'New',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="add-circle" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="notifications"
-          options={{
-            title: 'Alerts',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="notifications" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: 'Profile',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="person" size={size} color={color} />
-            ),
-          }}
-        />
+        <Tabs.Screen name="index" />
+        <Tabs.Screen name="search" />
+        <Tabs.Screen name="new" />
+        <Tabs.Screen name="tournaments" />
+        <Tabs.Screen name="profile" />
       </Tabs>
     </ThemeProvider>
   );
