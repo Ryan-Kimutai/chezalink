@@ -41,7 +41,8 @@
     "react-native-tab-view": "^4.1.2",
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
-    "expo-secure-store": "~14.2.3"
+    "expo-secure-store": "~14.2.3",
+    "expo-linear-gradient": "~14.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
