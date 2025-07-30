@@ -1,71 +1,91 @@
-import { Ionicons } from '@expo/vector-icons';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Tabs } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import React from 'react';
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+import Ionicons from '@expo/vector-icons/Ionicons';
+import Octicons from '@expo/vector-icons/Octicons';
 
+const _Layout = () => {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Tabs
-        screenOptions={({ route }) => ({
+    <Tabs
+      screenOptions={{
+        tabBarShowLabel: false,
+        tabBarItemStyle: {
+          width: '100%',
+          height: '100%',
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        tabBarStyle: {
+          backgroundColor: 'white',
+          borderRadius: 10,
+          marginHorizontal: 0,
+          marginBottom: 0,
+          height: 70,
+          position: 'absolute',
+          overflow: 'hidden',
+          borderWidth: 1,
+          borderColor: 'white',
+        },
+        tabBarActiveTintColor: 'green',
+        tabBarInactiveTintColor: 'black',
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
           headerShown: false,
-          tabBarActiveTintColor: '#1db954',
-          tabBarInactiveTintColor: '#999',
-          tabBarStyle: {
-            backgroundColor: colorScheme === 'dark' ? '#111' : '#fff',
-            borderTopWidth: 0.5,
-            borderTopColor: '#ccc',
-            paddingBottom: 4,
-            paddingTop: 6,
-            height: 60,
-          },
-          tabBarLabel:
-            route.name === 'index'
-              ? 'Home'
-              : route.name === 'search'
-              ? 'Search'
-              : route.name === 'new'
-              ? 'New'
-              : route.name === 'tournaments'
-              ? 'Tournaments'
-              : route.name === 'profile'
-              ? 'Profile'
-              : '',
-          tabBarIcon: ({ color, size }) => {
-            let iconName: keyof typeof Ionicons.glyphMap;
+          tabBarIcon: ({ focused, color, size }) => (
+            <Octicons name={focused ? 'home' : 'home'} size={28} color={color} />
+          ),
+        }}
+      />
 
-            switch (route.name) {
-              case 'index':
-                iconName = 'home';
-                break;
-              case 'search':
-                iconName = 'search';
-                break;
-              case 'new':
-                iconName = 'add-circle';
-                break;
-              case 'tournaments':
-                iconName = 'football';
-                break;
-              case 'profile':
-                iconName = 'person';
-                break;
-              default:
-                iconName = 'ellipse';
-            }
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: 'Search',
+          headerShown: false,
+          tabBarIcon: ({ focused, color, size }) => (
+            <Octicons name={focused ? 'search' : 'search'} size={28} color={color} />
+          ),
+        }}
+      />
 
-            return <Ionicons name={iconName} size={size} color={color} />;
-          },
-        })}
-      >
-        <Tabs.Screen name="index" />
-        <Tabs.Screen name="search" />
-        <Tabs.Screen name="new" />
-        <Tabs.Screen name="tournaments" />
-        <Tabs.Screen name="profile" />
-      </Tabs>
-    </ThemeProvider>
+      <Tabs.Screen
+        name="new"
+        options={{
+          title: 'Create',
+          headerShown: false,
+          tabBarIcon: ({ focused, color, size }) => (
+            <Octicons name={focused ? 'plus' : 'plus'} size={28} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="tournaments"
+        options={{
+          title: 'Tournaments',
+          headerShown: false,
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons name={focused ? 'football' : 'football-outline'} size={30} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          headerShown: false,
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={28} color={color} />
+          ),
+        }}
+      />
+    </Tabs>
   );
-}
+};
+
+export default _Layout;
