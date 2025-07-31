@@ -1,90 +1,84 @@
 const jwt = require('jsonwebtoken'); // For creating JWT tokens
-const bcrypt = require('bcrypt');    // For hashing passwords
-require('dotenv').config();          // Load variables from .env
+const pool = require('../db'); // PostgreSQL connection
+const bcrypt = require('bcrypt'); // For password hashing
+require('dotenv').config(); // Load environment variables
 
-// Temporary in-memory user store (will replace with a database later)
-const users = [];
-
-// Helper function to generate a JWT token
+// Generate JWT token using user ID and email
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.id, email: user.email },  // Payload to encode in token
-    process.env.JWT_SECRET,             // Secret key to sign the token
-    { expiresIn: '1w' }                 // Token expires in 1 week temporarily will change back to an 1hr later
+    { id: user.user_id, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: '1w' } // Temporary token expiration of 1 week will change in production to 1h
   );
 };
 
 // Controller for user signup
 const signup = async (req, res) => {
-  const { name, email, password } = req.body; // Get user input
-
-  // Check if the email is already registered
-  const userExists = users.find((user) => user.email === email);
-  if (userExists) {
-    return res.status(400).json({ message: 'User already exists' });
-  }
+  const { user_name, email, password } = req.body;
 
   try {
-    // Hash the password using bcrypt
+    // Check if email already exists
+    const userCheck = await pool.query('SELECT * FROM accounts WHERE email = $1', [email]);
+    if (userCheck.rows.length > 0) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Hash the password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create new user object with hashed password
-    const newUser = {
-      id: Date.now(),
-      name,
-      email,
-      password: hashedPassword
-    };
+    // Insert new user into the database
+    const newUserResult = await pool.query(
+      'INSERT INTO accounts (user_name, email, password) VALUES ($1, $2, $3) RETURNING user_id, user_name, email',
+      [user_name, email, hashedPassword]
+    );
 
-    // Store the user in the array
-    users.push(newUser);
+    const newUser = newUserResult.rows[0];
 
-    // Generate a token for the new user
+    // Generate token
     const token = generateToken(newUser);
 
-    // Send back the user data (excluding the password) and token
     res.status(201).json({
       message: 'User created',
       user: {
-        id: newUser.id,
-        name: newUser.name,
+        id: newUser.user_id,
+        name: newUser.user_name,
         email: newUser.email
       },
       token
     });
   } catch (error) {
     console.error('Signup error:', error);
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ error: 'Something went wrong', detail: error.message });
   }
 };
 
 // Controller for user login
 const login = async (req, res) => {
-  const { email, password } = req.body; // Get login credentials
-
-  // Find user by email
-  const user = users.find((u) => u.email === email);
-  if (!user) {
-    return res.status(401).json({ message: 'Invalid credentials' });
-  }
+  const { email, password } = req.body;
 
   try {
-    // Compare provided password with stored hashed password
+    // Get user from database
+    const result = await pool.query('SELECT * FROM accounts WHERE email = $1', [email]);
+    const user = result.rows[0];
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Generate a new token for the user
+    // Generate token
     const token = generateToken(user);
 
-    // Send back the user data and token
     res.json({
       message: 'Login successful',
       user: {
-        id: user.id,
-        name: user.name,
+        id: user.user_id,
+        name: user.user_name,
         email: user.email
       },
       token
@@ -95,16 +89,19 @@ const login = async (req, res) => {
   }
 };
 
-// Controller to list all users (excluding passwords)TEMPORARY FOR TESTING
-const getAllUsers = (req, res) => {
-  const usersWithoutPasswords = users.map(({ password, ...rest }) => rest);
-  res.json(usersWithoutPasswords);
+// Get all users without password (FOR TESTING ONLY)
+const getAllUsers = async (req, res) => {
+  try {
+    const result = await pool.query('SELECT user_id, user_name, email FROM accounts');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({ message: 'Failed to fetch users' });
+  }
 };
-// Export the controller functions
+
 module.exports = {
   signup,
   login,
-  getAllUsers,
-  users  // export users array for inspection (for testing only)
+  getAllUsers
 };
-
