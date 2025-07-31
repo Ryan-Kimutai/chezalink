@@ -15,10 +15,10 @@ export default function TournamentsScreen() {
   const tournaments = [
     {
       id: 1,
-      name: 'Spring Cup 2025',
+      name: 'SAINt L 2025',
       date: 'July 15, 2025',
-      location: 'Nairobi Stadium',
-      owner: 'John Doe',
+      location: 'Saint James Park',
+      owner: 'Saint',
       image: 'https://via.placeholder.com/300x150.png?text=Spring+Cup',
     },
     {
