@@ -103,6 +103,8 @@ const createTournament = (req, res) => {
       lost: 0,
       goalsFor: 0,
       goalsAgainst: 0,
+      goaldifference: 0,
+      goaldifference: 0,
       points: 0
     }));
   }
@@ -177,6 +179,7 @@ const recordMatch = (req, res) => {
     stats.played += 1;
     stats.goalsFor += goalsFor;
     stats.goalsAgainst += goalsAgainst;
+    stats.goaldifference = stats.goalsFor - stats.goalsAgainst;
 
     if (result === 'win') {
       stats.won += 1;
@@ -331,6 +334,31 @@ const advanceKnockoutStage = (req, res) => {
   res.json({ message: 'Advanced to next knockout stage', bracket: tournament.bracket });
 };
 
+// Tournament Feed: categorize tournaments by status
+const getTournamentFeed = (req, res) => {
+  const now = new Date();
+  const registration_open = [];
+  const ongoing = [];
+  const ended = [];
+
+  for (let t of tournaments) {
+    const start = new Date(t.createdAt); // You can add a separate startDate if needed
+    const hasMatches = matches.some(m => m.tournamentId === t.id);
+    const isConcluded = t.bracket?.every(m => m.winner !== null);
+
+    // Check for status manually since status is not updated dynamically
+    if (!hasMatches && t.status === 'upcoming') {
+      registration_open.push({ ...t, feedStatus: 'registration_open' });
+    } else if (hasMatches && !isConcluded) {
+      ongoing.push({ ...t, feedStatus: 'ongoing' });
+    } else if (isConcluded) {
+      ended.push({ ...t, feedStatus: 'ended' });
+    }
+  }
+
+  res.status(200).json({ registration_open, ongoing, ended });
+};
+
 module.exports = {
   createTournament,
   registerTeamToTournament,
@@ -339,6 +367,7 @@ module.exports = {
   getTournamentStats,
   generateKnockoutBracket,
   advanceKnockoutStage,
-  generateGroupsManually
+  generateGroupsManually,
+  getTournamentFeed 
 };
 

@@ -1,16 +1,21 @@
+const pool = require('../db');
 const { v4: uuidv4 } = require('uuid');
 
-// In-memory storage for MVP
-let posts = [];             // All posts
-let follows = {};           // Map of userId -> array of followed userIds
-
-// Create a new post (blog or video or image)
-const createPost = (req, res) => {
-  const { userId, type, content, videoUrl, imageUrl, tournamentId } = req.body;
+// Create a new post (blog, video, or image)
+const createPost = async (req, res) => {
+  const {
+    user_name,
+    type,
+    content,
+    videoUrl,
+    imageUrl,
+    tournamentId,
+    post_origin
+  } = req.body;
 
   // Basic validation
-  if (!userId || !type) {
-    return res.status(400).json({ error: 'userId and type are required.' });
+  if (!user_name || !type) {
+    return res.status(400).json({ error: 'user_name and type are required.' });
   }
 
   // Type-specific validations
@@ -20,28 +25,53 @@ const createPost = (req, res) => {
   if (type === 'video' && !videoUrl) {
     return res.status(400).json({ error: 'Video posts require a video URL.' });
   }
-  if (type === 'image' && !content) {
-    return res.status(400).json({ error: 'Image posts require image URL.' });
+  if (type === 'image' && !imageUrl) {
+    return res.status(400).json({ error: 'Image posts require an image URL.' });
   }
-  // Create the new post object
-  const newPost = {
-    id: uuidv4(),                         // Unique post ID
-    userId,
-    type,                                // 'blog', 'video', 'image'
-    content: content || '',              // Optional text (even for videos)
-    videoUrl: videoUrl || '',            // Optional Cloudinary video URL
-    imageUrl: imageUrl || '',            // Optional Cloudinary image URL
-    tournamentId: tournamentId || null,  // Optional reference to tournament
-    likes: 0,
-    views: 0,
-    createdAt: new Date().toISOString()
-  };
 
-  // Save to in-memory store
-  posts.push(newPost);
+  const post_id = uuidv4();
+  const created_at = new Date().toISOString();
 
-  res.status(201).json(newPost);
+  try {
+    const result = await pool.query(
+      `INSERT INTO posts (
+        post_id,
+        user_name,
+        type,
+        content,
+        video_url,
+        image_url,
+        tournament_id,
+        likes,
+        views,
+        created_at,
+        post_origin
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING *`,
+      [
+        post_id,
+        user_name,
+        type,
+        content || '',
+        videoUrl || '',
+        imageUrl || '',
+        tournamentId || null,
+        0, // likes (set to 0 explicitly)
+        0, // views (set to 0 explicitly)
+        created_at,
+        post_origin || 'user'
+      ]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error('Error creating post:', err.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 };
+
+
+
 
 // Get all posts for a given user
 const getUserPosts = (req, res) => {

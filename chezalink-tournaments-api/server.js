@@ -1,28 +1,25 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-
-const tournamentRoutes = require('./routes/tournamentRoutes');
-
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(bodyParser.json());
+// Import your tournament routes
+const tournamentRoutes = require('./routes/tournamentRoutes');
 
-// Routes
-app.use('/', tournamentRoutes);
+// Middleware to parse incoming JSON
+app.use(express.json());
 
-// Default route
+// Base test route
 app.get('/', (req, res) => {
   res.send('ChezaLink Tournament API is running');
 });
 
-// Start server
+// Use tournament routes
+app.use('/', tournamentRoutes); // or app.use('/api', tournamentRoutes)
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`✅ Server is running on port ${PORT}`);
 });
+
 
 
 

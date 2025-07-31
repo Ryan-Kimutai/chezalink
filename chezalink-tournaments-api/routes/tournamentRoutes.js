@@ -9,7 +9,8 @@ const {
   generateKnockoutBracket,
   registerTeamToTournament,
   advanceKnockoutStage,
-  generateGroupsManually
+  generateGroupsManually,
+  getTournamentFeed // New controller import added
 } = require('../controllers/tournamentController');
 
 // Create a tournament
@@ -35,6 +36,10 @@ router.post('/tournaments/:id/advance', advanceKnockoutStage);
 
 // Generate groups manually (for group-knockout tournaments)
 router.post('/tournaments/:id/generate-groups', generateGroupsManually);
+
+// Get tournament feed
+router.get('/tournaments/feed', getTournamentFeed); 
+// Responds with { registration_open: [], ongoing: [], ended: [] }
 
 module.exports = router;
 
