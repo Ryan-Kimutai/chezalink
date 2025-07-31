@@ -45,11 +45,11 @@
     "react-native-vector-icons": "^10.3.0",
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
-<<<<<<< HEAD
+
     "@react-native-community/datetimepicker": "8.4.1",
-=======
+
     "expo-secure-store": "~14.2.3",
->>>>>>> ebf73da16280570df4658048fec9511533e62288
+
     "expo-linear-gradient": "~14.1.5"
   },
   "devDependencies": {

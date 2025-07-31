@@ -8,7 +8,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 
@@ -52,14 +52,76 @@ export default function TournamentDetails() {
           </View>
         );
          case 'Table':
-        return (
-          <View style={[styles.content, { padding: 16 }]}>
-            <Text style={styles.cardTitle}>Tables are still in development</Text>
-            <Text style={styles.cardText}>
-              me and the table....walking side by side
-            </Text>
-          </View>
-        );
+case 'Table':
+  const tableData = [
+    {
+      pos: 1,
+      team: 'Saints',
+      played: 38,
+      won: 29,
+      drawn: 6,
+      lost: 3,
+      gf: 94,
+      ga: 33,
+      gd: 61,
+      points: 93,
+    },
+    {
+      pos: 2,
+      team: 'Manjesta',
+      played: 38,
+      won: 28,
+      drawn: 5,
+      lost: 5,
+      gf: 88,
+      ga: 32,
+      gd: 56,
+      points: 89,
+    },
+    // Add more teams...
+  ];
+
+  const renderHeader = () => (
+    <View style={[styles.row, styles.header]}>
+      
+    <Text style={[styles.cellSmall, { color: '#6e5e00ff' }]}>#</Text>         
+    <Text style={[styles.cellTeam, { color: '#004f69ff' }]}>Team</Text>       
+    <Text style={[styles.cell, { color: '#3d6900ff' }]}>P</Text>              
+    <Text style={[styles.cell, { color: '#346700ff' }]}>W</Text>             
+    <Text style={[styles.cell, { color: '#6c4800ff' }]}>D</Text>              
+    <Text style={[styles.cell, { color: '#762000ff' }]}>L</Text>             
+    <Text style={[styles.cell, { color: '#006e62ff' }]}>GF</Text>             
+    <Text style={[styles.cell, { color: '#6f026aff' }]}>GA</Text>            
+    <Text style={[styles.cell, { color: '#5d0074ff' }]}>GD</Text>             
+    <Text style={[styles.cell, { color: '#025e32ff' }]}>PTS</Text>      
+    </View>
+  );
+
+  const renderRow = (item: any) => (
+    <View key={item.pos} style={styles.row}>
+      <Text style={styles.cellSmall}>{item.pos}</Text>
+      <Text style={styles.cellTeam}>{item.team}</Text>
+      <Text style={styles.cell}>{item.played}</Text>
+      <Text style={styles.cell}>{item.won}</Text>
+      <Text style={styles.cell}>{item.drawn}</Text>
+      <Text style={styles.cell}>{item.lost}</Text>
+      <Text style={styles.cell}>{item.gf}</Text>
+      <Text style={styles.cell}>{item.ga}</Text>
+      <Text style={styles.cell}>{item.gd}</Text>
+      <Text style={styles.cell}>{item.points}</Text>
+    </View>
+  );
+
+  return (
+    <ScrollView style={styles.content}>
+      {renderHeader()}
+      {tableData.map(renderRow)}
+    </ScrollView>
+  );
+
+
+
+       
       default:
         return null;
     }
@@ -204,4 +266,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
+   row: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+  },
+  header: {
+    backgroundColor: 'white',
+    fontWeight: 'bold',
+    
+  },
+  cellSmall: {
+    width: 24,
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  cellTeam: {
+    flex: 2,
+    paddingLeft: 6,
+  },
+  cell: {
+    flex: 1,
+    textAlign: 'center',
+  },
 });
+
+
+
+
+
+
+
