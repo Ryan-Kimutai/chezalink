@@ -41,6 +41,7 @@ export default function TournamentsScreen() {
 
   const handleAddTournament = () => {
     router.push('/(modals)/add-tournament');
+
   };
 
   return (

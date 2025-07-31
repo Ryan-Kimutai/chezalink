@@ -1,7 +1,13 @@
-// ✅ app/(tabs)/profile.tsx
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 const profileData = {
   username: 'aisha_wambua',
@@ -20,14 +26,19 @@ const profileData = {
 export default function ProfileScreen() {
   const router = useRouter();
 
+  const handleEditProfile = () => {
+    // ✅ Correct usage without "/index"
+    router.push('/(modals)/edit-profile');
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.topIcons}>
-        <TouchableOpacity onPress={() => router.push({ pathname: '/(modals)/notifications' })}>
+        <TouchableOpacity onPress={() => router.push('/(modals)/notifications')}>
           <Ionicons name="notifications-outline" size={24} color="#1db954" />
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => router.push({ pathname: '/(modals)/settings' })}
+          onPress={() => router.push('/(modals)/settings')}
           style={{ marginLeft: 16 }}
         >
           <Ionicons name="settings-outline" size={24} color="#1db954" />
@@ -51,7 +62,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.editButton}>
+        <TouchableOpacity style={styles.editButton} onPress={handleEditProfile}>
           <Text style={styles.editButtonText}>Edit Profile</Text>
         </TouchableOpacity>
       </View>
