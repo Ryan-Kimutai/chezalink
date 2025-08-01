@@ -1,0 +1,35 @@
+const profileService = require('../services/userprofile.services');
+
+exports.createProfile = async (req, res) => {
+  try {
+    const user_name = req.user.id; // ✅ make sure this exists
+    const data = req.body;
+
+    const result = await profileService.createProfile(user_name, data);
+    res.status(201).json({ message: 'Profile created', profile: result });
+  } catch (error) {
+    console.error('Profile creation error:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+};
+
+exports.getMyProfile = async (req, res) => {
+  try {
+    const user_name  = req.user.id;
+    const profile = await profileService.getProfileByUserName(user_name);
+    if (!profile) return res.status(404).json({ message: 'Profile not found' });
+    res.json(profile);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const user_name = req.user.id;
+    const updated = await profileService.updateProfile(user_name, req.body);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
