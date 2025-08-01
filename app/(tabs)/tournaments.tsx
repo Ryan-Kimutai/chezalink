@@ -1,9 +1,11 @@
-// ✅ app/(tabs)/tournaments.tsx
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { router } from 'expo-router';
 import React from 'react';
 import {
+  ActionSheetIOS,
+  Alert,
   Image,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -41,16 +43,38 @@ export default function TournamentsScreen() {
 
   const handleAddTournament = () => {
     router.push('/(modals)/add-tournament');
+  };
 
+  const showEditOptions = (id: number) => {
+    const editHandler = () => {
+      router.push('/(modals)/edit-tournament');
+    };
+
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ['Cancel', 'Edit Tournament'],
+          cancelButtonIndex: 0,
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 1) {
+            editHandler();
+          }
+        }
+      );
+    } else {
+      // Fallback for Android
+      Alert.alert('Options', '', [
+        { text: 'Edit Tournament', onPress: editHandler },
+        { text: 'Cancel', style: 'cancel' },
+      ]);
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tournaments</Text>
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         {tournaments.map((item) => (
           <TouchableOpacity
             key={item.id}
@@ -59,6 +83,14 @@ export default function TournamentsScreen() {
             }
           >
             <View style={styles.shadowBox}>
+              {/* Dots Icon */}
+              <TouchableOpacity
+                style={styles.dotsIcon}
+                onPress={() => showEditOptions(item.id)}
+              >
+                <FontAwesome6 name="ellipsis-vertical" size={18} color="#444" />
+              </TouchableOpacity>
+
               <Image source={{ uri: item.image }} style={styles.image} />
               <Text style={styles.name}>{item.name}</Text>
               <Text style={styles.detail}>📅 {item.date}</Text>
@@ -69,7 +101,7 @@ export default function TournamentsScreen() {
         ))}
       </ScrollView>
 
-      {/* Floating Plus Button */}
+      {/* Floating + Button */}
       <TouchableOpacity
         style={styles.fab}
         onPress={handleAddTournament}
@@ -102,7 +134,7 @@ const styles = StyleSheet.create({
     width: '99%',
     alignSelf: 'center',
     backgroundColor: '#fff',
-    padding: 50,
+    padding: 16,
     marginVertical: 10,
     borderRadius: 10,
     shadowColor: '#000',
@@ -110,6 +142,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 2,
+    position: 'relative',
+  },
+  dotsIcon: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 8,
+    zIndex: 5,
   },
   image: {
     width: '100%',
