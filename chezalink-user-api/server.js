@@ -1,0 +1,19 @@
+const express = require('express');
+const dotenv = require('dotenv');
+const profileRoutes = require('./routes/userprofileroutes');
+
+dotenv.config(); // Load environment variables from .env
+
+const app = express();
+const PORT = process.env.USER_PROFILE_PORT || 4001;
+
+// Middleware to parse JSON request bodies
+app.use(express.json());
+
+// Mount profile routes under /api/profile
+app.use('/api/profile', profileRoutes);
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`✅ User Profile API running on port ${PORT}`);
+});
