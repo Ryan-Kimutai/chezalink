@@ -1,8 +1,11 @@
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -11,111 +14,176 @@ import {
 } from 'react-native';
 
 export default function RegisterScreen() {
-  const router = useRouter();
-  const [name, setName] = useState('');
+  const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!name || !email || !password) {
-      Alert.alert('Missing Fields', 'Please fill in all fields.');
+    if (!userName || !email || !password) {
+      Alert.alert('Missing Fields', 'Please fill all fields.');
       return;
     }
 
     setLoading(true);
-
     try {
-      const response = await fetch('http://172.20.10.14:5000/api/auth/signup', {
+      const res = await fetch('http://localhost:5000/api/auth/signup', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_name: userName,
+          email,
+          password,
+        }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Registration failed');
 
-      if (response.ok) {
-        Alert.alert('Success', 'Account created! Please log in.');
-        router.replace('/login'); // go to login page after successful signup
-      } else {
-        Alert.alert('Registration Failed', data.message || 'Unable to register. Try again.');
-      }
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('user', JSON.stringify(data.user));
+
+      Alert.alert('Success', 'Account created!');
+      router.replace('/');
     } catch (err) {
-      console.error(err);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      const message =
+        err instanceof Error ? err.message : 'Something went wrong';
+      Alert.alert('Error', message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Create Account</Text>
-      <Text style={styles.subtitle}>Join ChezaLink and discover talent</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}
+    >
+      <View style={styles.container}>
+        {/* Logo/Header */}
+        <View style={styles.header}>
+          <Text style={styles.logo}>
+            ぷ Cheza
+            <Text style={{ color: '#000' }}>Link</Text>
+          </Text>
+        </View>
 
-      <TextInput
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        style={styles.input}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-      <TextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        style={styles.input}
-        secureTextEntry
-      />
+        <Text style={styles.title}>Create an Account</Text>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleRegister}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Register</Text>
-        )}
-      </TouchableOpacity>
+        {/* Name */}
+        <Text style={styles.label}>Name</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="John Doe"
+          value={userName}
+          onChangeText={setUserName}
+        />
 
-      <Text style={styles.link} onPress={() => router.push('/login')}>
-        Already have an account? <Text style={styles.linkBold}>Login</Text>
-      </Text>
-    </View>
+        {/* Email */}
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="you@example.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+        />
+
+        {/* Password */}
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter a secure password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+
+        {/* Register Button */}
+        <LinearGradient
+          colors={['#1db954', '#000']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.registerButton}
+        >
+          <TouchableOpacity onPress={handleRegister} disabled={loading}>
+            <Text style={styles.registerButtonText}>
+              {loading ? 'Registering...' : 'Register'}
+            </Text>
+          </TouchableOpacity>
+        </LinearGradient>
+
+        {/* Navigation to Login */}
+        <TouchableOpacity onPress={() => router.push('/login')}>
+          <Text style={styles.linkText}>
+            Already have an account?{' '}
+            <Text style={styles.linkBold}>Login</Text>
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#fff' },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 8 },
-  subtitle: { fontSize: 16, color: '#555', marginBottom: 20 },
+  container: {
+    padding: 20,
+    backgroundColor: '#fff',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  logo: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#1db954',
+    fontFamily: 'sans-serif-condensed',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 24,
+    textAlign: 'center',
+    color: '#111',
+  },
+  label: {
+    fontWeight: '600',
+    fontSize: 14,
+    marginBottom: 6,
+    marginTop: 16,
+    color: '#333',
+  },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
+    width: '100%',
     padding: 12,
     borderRadius: 8,
-    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#ccc',
     backgroundColor: '#f9f9f9',
   },
-  button: {
-    backgroundColor: '#1db954',
-    padding: 14,
-    borderRadius: 8,
+  registerButton: {
+    marginTop: 30,
+    borderRadius: 12,
     alignItems: 'center',
-    marginTop: 10,
+    paddingVertical: 14,
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  link: { marginTop: 20, textAlign: 'center', color: '#555' },
-  linkBold: { color: '#1db954', fontWeight: '600' },
+  registerButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  linkText: {
+    marginTop: 20,
+    textAlign: 'center',
+    fontSize: 14,
+    color: '#333',
+  },
+  linkBold: {
+    color: '#1db954',
+    fontWeight: 'bold',
+  },
 });

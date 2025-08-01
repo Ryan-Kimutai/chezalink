@@ -1,9 +1,11 @@
-import { useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
-import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -12,106 +14,161 @@ import {
 } from 'react-native';
 
 export default function LoginScreen() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Missing Fields', 'Please fill in all fields.');
+      Alert.alert('Missing Fields', 'Please fill all fields.');
       return;
     }
 
     setLoading(true);
-
     try {
-      const response = await fetch('http://172.20.10.14:5000/api/auth/login', {
+      const res = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Login failed');
 
-      if (response.ok) {
-        await SecureStore.setItemAsync('token', data.token);
-        router.replace('/(tabs)'); // Redirect to main app layout
-      } else {
-        Alert.alert('Login Failed', data.message || 'Invalid credentials.');
-      }
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('user', JSON.stringify(data.user));
+
+      Alert.alert('Welcome back!', `Hi ${data.user.name}`);
+      router.replace('/');
     } catch (err) {
-      console.error('Login Error:', err);
-      Alert.alert('Error', 'Something went wrong. Try again.');
+      const message =
+        err instanceof Error ? err.message : 'An unexpected error occurred';
+      Alert.alert('Login Failed', message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome Back</Text>
-      <Text style={styles.subtitle}>Login to your ChezaLink account</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={styles.container}>
+        {/* Logo/Header */}
+        <View style={styles.header}>
+          <Text style={styles.logo}>
+            ぷ Cheza
+            <Text style={{ color: '#000' }}>Link</Text>
+          </Text>
+        </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+        <Text style={styles.title}>Welcome back!</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+        {/* Email */}
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="you@example.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+        />
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Login</Text>
-        )}
-      </TouchableOpacity>
+        {/* Password */}
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
 
-      <Text style={styles.link} onPress={() => router.push('/register')}>
-        Don’t have an account? <Text style={styles.linkBold}>Register</Text>
-      </Text>
-    </View>
+        {/* Login Button */}
+        <LinearGradient
+          colors={['#1db954', '#000']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.loginButton}
+        >
+          <TouchableOpacity onPress={handleLogin} disabled={loading}>
+            <Text style={styles.loginButtonText}>
+              {loading ? 'Logging in...' : 'Login'}
+            </Text>
+          </TouchableOpacity>
+        </LinearGradient>
+
+        {/* Navigation to Register */}
+        <TouchableOpacity onPress={() => router.push('/register')}>
+          <Text style={styles.linkText}>
+            Don’t have an account? <Text style={styles.linkBold}>Register</Text>
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
-    justifyContent: 'center',
     backgroundColor: '#fff',
+    flex: 1,
+    justifyContent: 'center',
   },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 8 },
-  subtitle: { fontSize: 16, color: '#666', marginBottom: 20 },
+  header: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  logo: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#1db954',
+    fontFamily: 'sans-serif-condensed',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 24,
+    textAlign: 'center',
+    color: '#111',
+  },
+  label: {
+    fontWeight: '600',
+    fontSize: 14,
+    marginBottom: 6,
+    marginTop: 16,
+    color: '#333',
+  },
   input: {
+    width: '100%',
+    padding: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ccc',
     backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 15,
   },
-  button: {
-    backgroundColor: '#1db954',
-    padding: 14,
-    borderRadius: 8,
+  loginButton: {
+    marginTop: 30,
+    borderRadius: 12,
     alignItems: 'center',
-    marginTop: 10,
+    paddingVertical: 14,
   },
-  buttonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
-  link: { marginTop: 20, color: '#555', textAlign: 'center' },
-  linkBold: { color: '#1db954', fontWeight: '600' },
+  loginButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  linkText: {
+    marginTop: 20,
+    textAlign: 'center',
+    fontSize: 14,
+    color: '#333',
+  },
+  linkBold: {
+    color: '#1db954',
+    fontWeight: 'bold',
+  },
 });
