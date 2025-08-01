@@ -70,9 +70,6 @@ const createPost = async (req, res) => {
   }
 };
 
-
-
-
 // Get all posts for a given user
 const getUserPosts = (req, res) => {
   const { userId } = req.params;
