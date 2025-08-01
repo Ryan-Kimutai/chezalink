@@ -1,49 +1,65 @@
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ActionSheetIOS,
   Alert,
   Image,
   Platform,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
+
+const tournaments = [
+  {
+    id: 1,
+    name: 'SAINt L 2025',
+    date: 'July 15, 2025',
+    location: 'Saint James Park',
+    owner: 'Saint',
+    image: 'https://via.placeholder.com/300x150.png?text=Spring+Cup',
+  },
+  {
+    id: 2,
+    name: 'Champions League',
+    date: 'August 3, 2025',
+    location: 'Kasarani Grounds',
+    owner: 'Elite Sports',
+    image: 'https://via.placeholder.com/300x150.png?text=Champions+League',
+  },
+  {
+    id: 3,
+    name: 'Youth Football Fest',
+    date: 'September 10, 2025',
+    location: 'Mombasa Arena',
+    owner: 'Youth United',
+    image: 'https://via.placeholder.com/300x150.png?text=Youth+Fest',
+  },
+];
+
+const TournamentCard = ({ item, onEdit }: any) => (
+  <TouchableOpacity onPress={() => router.push(`/(modals)/view-tournament/${item.id}` as any)}>
+    <View style={styles.shadowBox}>
+      <TouchableOpacity style={styles.dotsIcon} onPress={() => onEdit(item.id)}>
+        <FontAwesome6 name="ellipsis-vertical" size={18} color="#444" />
+      </TouchableOpacity>
+      <Image source={{ uri: item.image }} style={styles.image} />
+      <Text style={styles.name}>{item.name}</Text>
+      <Text style={styles.detail}>📅 {item.date}</Text>
+      <Text style={styles.detail}>📍 {item.location}</Text>
+      <Text style={styles.detail}>🧑 {item.owner}</Text>
+    </View>
+  </TouchableOpacity>
+);
 
 export default function TournamentsScreen() {
-  const tournaments = [
-    {
-      id: 1,
-      name: 'SAINt L 2025',
-      date: 'July 15, 2025',
-      location: 'Saint James Park',
-      owner: 'Saint',
-      image: 'https://via.placeholder.com/300x150.png?text=Spring+Cup',
-    },
-    {
-      id: 2,
-      name: 'Champions League',
-      date: 'August 3, 2025',
-      location: 'Kasarani Grounds',
-      owner: 'Elite Sports',
-      image: 'https://via.placeholder.com/300x150.png?text=Champions+League',
-    },
-    {
-      id: 3,
-      name: 'Youth Football Fest',
-      date: 'September 10, 2025',
-      location: 'Mombasa Arena',
-      owner: 'Youth United',
-      image: 'https://via.placeholder.com/300x150.png?text=Youth+Fest',
-    },
-  ];
-
-  const handleAddTournament = () => {
-    router.push('/(modals)/add-tournament');
-  };
+  const layout = useWindowDimensions();
 
   const showEditOptions = (id: number) => {
     const editHandler = () => {
@@ -63,7 +79,6 @@ export default function TournamentsScreen() {
         }
       );
     } else {
-      // Fallback for Android
       Alert.alert('Options', '', [
         { text: 'Edit Tournament', onPress: editHandler },
         { text: 'Cancel', style: 'cancel' },
@@ -71,71 +86,88 @@ export default function TournamentsScreen() {
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tournaments</Text>
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        {tournaments.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            onPress={() =>
-              router.push(`/(modals)/view-tournament/${item.id}` as any)
-            }
-          >
-            <View style={styles.shadowBox}>
-              {/* Dots Icon */}
-              <TouchableOpacity
-                style={styles.dotsIcon}
-                onPress={() => showEditOptions(item.id)}
-              >
-                <FontAwesome6 name="ellipsis-vertical" size={18} color="#444" />
-              </TouchableOpacity>
+  const AllTournamentsRoute = () => (
+    <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      {tournaments.map((item) => (
+        <TournamentCard key={item.id} item={item} onEdit={showEditOptions} />
+      ))}
+    </ScrollView>
+  );
 
-              <Image source={{ uri: item.image }} style={styles.image} />
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.detail}>📅 {item.date}</Text>
-              <Text style={styles.detail}>📍 {item.location}</Text>
-              <Text style={styles.detail}>🧑 {item.owner}</Text>
-            </View>
-          </TouchableOpacity>
+  const MyTournamentsRoute = () => {
+    const myTournaments = tournaments.filter((t) => t.owner === 'Saint');
+    return (
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        {myTournaments.map((item) => (
+          <TournamentCard key={item.id} item={item} onEdit={showEditOptions} />
         ))}
       </ScrollView>
+    );
+  };
 
-      {/* Floating + Button */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={handleAddTournament}
-        activeOpacity={0.7}
-      >
-        <FontAwesome6 name="plus" size={24} color="black" />
-      </TouchableOpacity>
-    </View>
+  const [index, setIndex] = useState(0);
+  const [routes] = useState([
+    { key: 'all', title: 'Tournaments' },
+    { key: 'mine', title: 'My Tournaments' },
+  ]);
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <TabView
+          navigationState={{ index, routes }}
+          renderScene={SceneMap({
+            all: AllTournamentsRoute,
+            mine: MyTournamentsRoute,
+          })}
+          onIndexChange={setIndex}
+          initialLayout={{ width: layout.width }}
+          renderTabBar={(props) => (
+            <TabBar
+              {...props}
+              indicatorStyle={{ backgroundColor: '#06753a' }}
+              style={{
+                backgroundColor: 'white',
+                height: 50,
+                borderRadius: 0,
+                overflow: 'hidden',
+              }}
+              activeColor="#06753a"
+              inactiveColor="#888"
+            />
+          )}
+        />
+
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => router.push('/(modals)/add-tournament')}
+        >
+          <FontAwesome6 name="plus" size={24} color="black" />
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: 50,
-    paddingHorizontal: 5,
   },
   scrollContainer: {
-    paddingBottom: 20,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#06753aff',
-    marginBottom: 10,
-    alignSelf: 'center',
+    flexGrow: 1,
+    paddingVertical: 30,
+    paddingHorizontal: 10,
+    backgroundColor: '#fff',
   },
   shadowBox: {
-    width: '99%',
-    alignSelf: 'center',
     backgroundColor: '#fff',
     padding: 16,
-    marginVertical: 10,
+    marginBottom: 10,
     borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 4, height: 4 },
@@ -171,7 +203,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 100,
     right: 20,
-    backgroundColor: '#ffffffff',
+    backgroundColor: '#fff',
     borderRadius: 30,
     padding: 16,
     elevation: 10,
