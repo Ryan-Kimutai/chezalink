@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -17,17 +16,23 @@ export default function RegisterScreen() {
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!userName || !email || !password) {
+    if (!userName || !email || !password || !confirmPassword) {
       Alert.alert('Missing Fields', 'Please fill all fields.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Password Mismatch', 'Passwords do not match.');
       return;
     }
 
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/signup', {
+      const res = await fetch('http://192.168.0.100:5000/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -40,11 +45,8 @@ export default function RegisterScreen() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Registration failed');
 
-      await AsyncStorage.setItem('token', data.token);
-      await AsyncStorage.setItem('user', JSON.stringify(data.user));
-
-      Alert.alert('Success', 'Account created!');
-      router.replace('/');
+      Alert.alert('Success', 'Account created! Please log in.');
+      router.replace('/login');
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Something went wrong';
@@ -98,6 +100,16 @@ export default function RegisterScreen() {
           secureTextEntry
           value={password}
           onChangeText={setPassword}
+        />
+
+        {/* Confirm Password */}
+        <Text style={styles.label}>Confirm Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Re-enter password"
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
         />
 
         {/* Register Button */}
