@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ResizeMode, Video } from 'expo-av';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -10,18 +11,16 @@ import {
 } from 'react-native';
 
 type Post = {
-  id: string;
-  userId: string;
+  post_id: string;
+  user_name: string;
   type: 'video' | 'image' | 'blog';
   content: string;
-  videoUrl?: string;
-  imageUrl?: string;
+  video_url: string;
+  image_url: string;
   likes: number;
-  comments?: number;
-  createdAt: string;
+  views: number;
+  created_at: string;
 };
-
-const userId = 'user123'; // 🔁 Replace with real user logic
 
 export default function HomeScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -29,7 +28,13 @@ export default function HomeScreen() {
 
   const fetchFeed = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/posts/feed/${userId}`);
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('user_id');
+      if (!token || !userId) throw new Error('Missing auth');
+
+      const res = await fetch(`http://localhost:3000/api/posts/feed/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
       setPosts(data);
     } catch (error) {
@@ -59,12 +64,12 @@ export default function HomeScreen() {
       </View>
 
       {posts.map((post) => (
-        <View key={post.id} style={styles.post}>
-          <Text style={styles.username}>@{post.userId}</Text>
+        <View key={post.post_id} style={styles.post}>
+          <Text style={styles.username}>@{post.user_name}</Text>
 
-          {post.type === 'video' && post.videoUrl && (
+          {post.type === 'video' && post.video_url && (
             <Video
-              source={{ uri: post.videoUrl }}
+              source={{ uri: post.video_url }}
               style={styles.video}
               resizeMode={ResizeMode.COVER}
               useNativeControls
@@ -72,8 +77,8 @@ export default function HomeScreen() {
             />
           )}
 
-          {post.type === 'image' && post.imageUrl && (
-            <Image source={{ uri: post.imageUrl }} style={styles.video} />
+          {post.type === 'image' && post.image_url && (
+            <Image source={{ uri: post.image_url }} style={styles.video} />
           )}
 
           {post.type === 'blog' && (
@@ -81,9 +86,8 @@ export default function HomeScreen() {
           )}
 
           <View style={styles.actions}>
-            <Text>♥ {post.likes}</Text>
-            <Text>💬 0</Text>
-            <Text>🔗</Text>
+            <Text>♥️ {post.likes}</Text>
+            <Text>👁 {post.views}</Text>
           </View>
 
           {post.content && post.type !== 'blog' && (
@@ -96,11 +100,7 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
-  },
+  container: { flex: 1, padding: 16, backgroundColor: '#fff' },
   header: {
     paddingTop: 50,
     paddingBottom: 12,

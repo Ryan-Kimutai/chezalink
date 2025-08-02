@@ -1,8 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
+  Dimensions,
   Image,
   ScrollView,
   StyleSheet,
@@ -11,182 +14,119 @@ import {
   View,
 } from 'react-native';
 
-const profileData = {
-  username: 'aisha_wambua',
-  fullName: 'Aisha Wambua',
-  bio: 'Barcelona Femini 🇰🇪 | Kenya Junior Team',
-  profilePic: require('../../assets/profile2.jpg'),
-  followers: 1200,
-  following: 180,
-  posts: [
-    require('../../assets/aisha1.jpg'),
-    require('../../assets/aisha2.jpg'),
-    require('../../assets/aisha3.jpg'),
-  ],
-  moreInfo: {
-    team: 'Kileleshwa FC',
-    position: 'FW',
-    dob: '12th Dec 2011',
-    foot: 'L',
-    location: 'Kileleshwa',
-  },
-  activity: [
-    { team: 'Kilimani Fc', tournament: 'Ujamma Tournament', g: 3, a: 1, p: 2 },
-    { team: 'Kilimani Fc', tournament: 'JAMHURI TROPHY', g: 4, a: 1, p: 5 },
-  ],
-  comments: [
-    {
-      name: 'Thiery Scout',
-      text: 'Phenomenal finisher cuts in on his left with deadly precision even at 14 years old. This is a TOP TALENT!!',
-      likes: 21,
-      time: '2 w',
-    },
-    {
-      name: 'Jay Mwalimu',
-      text: 'Great attacking wise however you need to improve on your work rate as modern football tactics require forwards to press',
-      likes: 5,
-      time: '3 w',
-    },
-  ],
-};
+const windowWidth = Dimensions.get('window').width;
 
-export default function ProfileScreen() {
+const ProfileScreen = () => {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'posts' | 'about' | 'comments'>('posts');
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProfile = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const res = await fetch('http://localhost:3000/api/profile/me', {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ FIXED LINE
+        },
+      });
+
+      if (!res.ok) throw new Error('Failed to fetch profile');
+      const data = await res.json();
+      setProfile(data);
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   const handleEditProfile = () => {
     router.push('/(modals)/edit-profile');
   };
 
-  const renderTabContent = () => {
-    if (activeTab === 'posts') {
-      return (
-        <View style={styles.tabContent}>
-          {profileData.posts.map((img, idx) => (
-            <Image key={idx} source={img} style={styles.postImage} />
-          ))}
-        </View>
-      );
-    } else if (activeTab === 'about') {
-      return (
-        <View style={{ padding: 16 }}>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>MORE INFO:</Text>
-            <Text style={styles.infoLine}>
-              <Text style={styles.bold}>Current Team:</Text> {profileData.moreInfo.team}
-            </Text>
-            <Text style={styles.infoLine}>
-              <Text style={styles.bold}>Position:</Text> {profileData.moreInfo.position}
-            </Text>
-            <Text style={styles.infoLine}>
-              <Text style={styles.bold}>Date of Birth:</Text> {profileData.moreInfo.dob}
-            </Text>
-            <Text style={styles.infoLine}>
-              <Text style={styles.bold}>Preferred foot:</Text> {profileData.moreInfo.foot}
-            </Text>
-            <Text style={styles.infoLine}>
-              <Text style={styles.bold}>Location:</Text> {profileData.moreInfo.location}
-            </Text>
-          </View>
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#1db954" />
+      </View>
+    );
+  }
 
-          <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>RECENT ACTIVITY</Text>
-            {profileData.activity.map((a, idx) => (
-              <Text key={idx} style={styles.infoLine}>
-                ⚽ {a.team} - {a.tournament} → {a.g} {a.a} {a.p}
-              </Text>
-            ))}
-            <Text style={[styles.infoLine, { color: 'green', marginTop: 6 }]}>view full history</Text>
-          </View>
-        </View>
-      );
-    } else if (activeTab === 'comments') {
-      return (
-        <View style={{ padding: 16 }}>
-          {profileData.comments.map((c, i) => (
-            <View key={i} style={styles.commentCard}>
-              <Text style={styles.commentHeader}>Scout {c.name} • {c.time}</Text>
-              <Text style={styles.commentText}>{c.text}</Text>
-              <Text style={styles.commentLikes}>♡ {c.likes}</Text>
-            </View>
-          ))}
-        </View>
-      );
-    }
-  };
+  if (!profile) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={{ color: 'red' }}>Failed to load profile</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
-        <View style={styles.topIcons}>
-          <TouchableOpacity onPress={() => router.push('/(modals)/notifications')}>
-            <Ionicons name="notifications-outline" size={24} color="#1db954" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => router.push('/(modals)/settings')}
-            style={{ marginLeft: 16 }}
-          >
-            <Ionicons name="settings-outline" size={24} color="#1db954" />
-          </TouchableOpacity>
-        </View>
+    <ScrollView style={styles.container}>
+      {/* Top Icons */}
+      <View style={styles.topIcons}>
+        <TouchableOpacity onPress={() => router.push('/(modals)/notifications')}>
+          <Ionicons name="notifications-outline" size={24} color="#1db954" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/(modals)/settings')} style={{ marginLeft: 16 }}>
+          <Ionicons name="settings-outline" size={24} color="#1db954" />
+        </TouchableOpacity>
+      </View>
 
-        <View style={styles.header}>
-          <Image source={profileData.profilePic} style={styles.avatar} />
-          <Text style={styles.fullName}>{profileData.fullName}</Text>
-          <Text style={styles.bio}>{profileData.bio}</Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <Image
+          source={require('../../assets/profile2.jpg')} // Replace with Cloudinary later
+          style={styles.avatar}
+        />
+        <Text style={styles.fullName}>{profile.first_name} {profile.last_name}</Text>
+        <Text style={styles.bio}>{profile.bio || 'No bio yet'}</Text>
 
-          <View style={styles.stats}>
-            <View style={styles.statBox}>
-              <Text style={styles.statNumber}>{profileData.followers}</Text>
-              <Text style={styles.statLabel}>Followers</Text>
-            </View>
-            <View style={styles.statBox}>
-              <Text style={styles.statNumber}>{profileData.following}</Text>
-              <Text style={styles.statLabel}>Following</Text>
-            </View>
+        {/* Stats */}
+        <View style={styles.stats}>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statLabel}>Followers</Text>
           </View>
-
-          {/* Edit button centered */}
-          <TouchableOpacity onPress={handleEditProfile} style={styles.centeredEditProfile}>
-            <LinearGradient
-              colors={['#1db954', '#003c1b']}
-              style={styles.gradientButton}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Text style={styles.buttonText}>Edit Profile</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statLabel}>Following</Text>
+          </View>
         </View>
 
-        {/* Tab Buttons */}
-        <View style={styles.tabBar}>
-          {['posts', 'about', 'comments'].map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              onPress={() => setActiveTab(tab as any)}
-              style={[
-                styles.tabItem,
-                activeTab === tab && styles.activeTabItem,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === tab && styles.activeTabText,
-                ]}
-              >
-                {tab === 'posts' ? 'Posts' : tab === 'about' ? 'About' : 'Scouts Comments'}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {/* Edit Profile Button */}
+        <TouchableOpacity onPress={handleEditProfile} style={styles.editProfileButton}>
+          <LinearGradient
+            colors={['#1db954', '#003c1b']}
+            style={styles.gradientButton}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={styles.buttonText}>Edit Profile</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
 
-        {renderTabContent()}
-      </ScrollView>
-    </View>
+      {/* Tab placeholders */}
+      <View style={styles.tabButtons}>
+        <Text style={styles.tabButton}>Posts</Text>
+        <Text style={styles.tabButton}>About</Text>
+        <Text style={styles.tabButton}>Scouts Comments</Text>
+      </View>
+
+      <View style={{ padding: 16 }}>
+        <Text style={{ fontSize: 16, color: '#444' }}>Tab content placeholder (static)</Text>
+      </View>
+    </ScrollView>
   );
-}
+};
+
+export default ProfileScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
@@ -227,8 +167,8 @@ const styles = StyleSheet.create({
   statNumber: { fontWeight: 'bold', fontSize: 16 },
   statLabel: { fontSize: 12, color: '#777' },
 
-  centeredEditProfile: {
-    marginTop: 20,
+  editProfileButton: {
+    marginTop: 16,
   },
   gradientButton: {
     paddingVertical: 6,
@@ -240,80 +180,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 13,
   },
-
-  tabBar: {
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tabButtons: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    paddingVertical: 10,
+    borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#ddd',
-    marginTop: 10,
+    borderColor: '#eee',
   },
-  tabItem: {
-    paddingVertical: 12,
-  },
-  activeTabItem: {
-    borderBottomWidth: 2,
-    borderColor: '#1db954',
-  },
-  tabText: {
+  tabButton: {
     fontSize: 14,
-    color: '#777',
-    fontWeight: 'bold',
-  },
-  activeTabText: {
+    fontWeight: '600',
     color: '#1db954',
-  },
-
-  tabContent: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: 12,
-    justifyContent: 'space-between',
-  },
-  postImage: {
-    width: '32%',
-    aspectRatio: 1,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-
-  infoCard: {
-    backgroundColor: '#ecfff1',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 12,
-  },
-  infoTitle: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginBottom: 6,
-  },
-  infoLine: {
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  bold: {
-    fontWeight: 'bold',
-  },
-
-  commentCard: {
-    backgroundColor: '#fff',
-    padding: 14,
-    borderRadius: 8,
-    marginBottom: 12,
-    elevation: 2,
-  },
-  commentHeader: {
-    fontWeight: 'bold',
-    marginBottom: 6,
-  },
-  commentText: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 8,
-  },
-  commentLikes: {
-    fontSize: 12,
-    color: '#888',
   },
 });

@@ -1,5 +1,7 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ResizeMode, Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -17,8 +19,6 @@ export default function NewPostScreen() {
   const [caption, setCaption] = useState('');
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
-
-  const userId = 'user123'; // 🔁 Replace with real user ID
 
   const pickMedia = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -44,32 +44,31 @@ export default function NewPostScreen() {
     setUploading(true);
 
     try {
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('user_id');
+      if (!token || !userId) throw new Error('Not authenticated');
+
       const formData = new FormData();
-      const fileField = {
+      formData.append(media.type, {
         uri: media.uri,
-        name: media.uri.split('/').pop() || 'media',
+        name: media.uri.split('/').pop(),
         type: media.type === 'video' ? 'video/mp4' : 'image/jpeg',
-      };
+      } as any);
 
-      formData.append(media.type, fileField as any);
-
-      const uploadRes = await fetch(
-        `http://localhost:3000/api/posts/upload-${media.type}`,
-        {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
+      const uploadRes = await fetch(`http://localhost:3000/api/posts/upload-${media.type}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      });
 
       const uploadData = await uploadRes.json();
       const mediaUrl = media.type === 'video' ? uploadData.videoUrl : uploadData.imageUrl;
 
-      // Save post
       const postPayload = {
-        userId,
+        user_name: userId,
         type: media.type,
         content: caption,
         videoUrl: media.type === 'video' ? mediaUrl : '',
@@ -78,7 +77,10 @@ export default function NewPostScreen() {
 
       await fetch('http://localhost:3000/api/posts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(postPayload),
       });
 
@@ -87,7 +89,7 @@ export default function NewPostScreen() {
       setCaption('');
       router.push('/');
     } catch (err) {
-      console.error(err);
+      console.error('Upload failed:', err);
       Alert.alert('Error', 'Upload failed. Try again.');
     } finally {
       setUploading(false);
@@ -126,10 +128,10 @@ export default function NewPostScreen() {
         multiline
       />
 
-      <TouchableOpacity onPress={handlePost} style={styles.postButton} disabled={uploading}>
-        <Text style={styles.postButtonText}>
-          {uploading ? 'Uploading...' : 'Post'}
-        </Text>
+      <TouchableOpacity onPress={handlePost} disabled={uploading}>
+        <LinearGradient colors={['#1db954', '#003c1b']} style={styles.postButton}>
+          <Text style={styles.postButtonText}>{uploading ? 'Uploading...' : 'Post'}</Text>
+        </LinearGradient>
       </TouchableOpacity>
     </View>
   );
@@ -157,7 +159,6 @@ const styles = StyleSheet.create({
     height: 80,
   },
   postButton: {
-    backgroundColor: '#1db954',
     padding: 14,
     borderRadius: 10,
     alignItems: 'center',
