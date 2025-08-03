@@ -1,7 +1,5 @@
-// app/(tabs)/new.tsx
 import { ResizeMode, Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -14,13 +12,15 @@ import {
   View,
 } from 'react-native';
 
+const API_BASE = 'http://192.168.0.100:3000'; // ✅ Replace with actual IP if needed
+
 export default function NewPostScreen() {
   const [media, setMedia] = useState<{ uri: string; type: 'image' | 'video' } | null>(null);
   const [caption, setCaption] = useState('');
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
 
-  const user_name = 'user123'; // 🔁 Replace with dynamic user data
+  const user_name = 'john'; // 🔁 Replace with actual logged-in user logic
 
   const pickMedia = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -52,10 +52,12 @@ export default function NewPostScreen() {
         name: media.uri.split('/').pop() || 'media',
         type: media.type === 'video' ? 'video/mp4' : 'image/jpeg',
       };
+
       formData.append(media.type, fileField as any);
 
+      // Upload to Cloudinary via backend
       const uploadRes = await fetch(
-        `http://192.168.0.100:3000/api/posts/upload-${media.type}`,
+        `${API_BASE}/api/posts/upload-${media.type}`,
         {
           method: 'POST',
           body: formData,
@@ -68,6 +70,7 @@ export default function NewPostScreen() {
       const uploadData = await uploadRes.json();
       const mediaUrl = media.type === 'video' ? uploadData.videoUrl : uploadData.imageUrl;
 
+      // 🔁 Build post payload
       const postPayload = {
         user_name,
         type: media.type,
@@ -76,13 +79,24 @@ export default function NewPostScreen() {
         imageUrl: media.type === 'image' ? mediaUrl : '',
       };
 
-      await fetch('http://192.168.0.100:3000/api/posts', {
+      // ✅ Final post creation using your exact requested code
+      const postRes = await fetch(`${API_BASE}/api/posts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(postPayload),
       });
 
-      Alert.alert('Success', 'Your post has been uploaded.');
+      const postData = await postRes.json();
+
+      if (!postRes.ok) {
+        console.log('Post error:', postData);
+        Alert.alert('Post failed', postData.error || 'Something went wrong');
+        return;
+      }
+
+      console.log('Post success:', postData);
+      Alert.alert('Success', 'Post created successfully');
+
       setMedia(null);
       setCaption('');
       router.push('/');
@@ -126,20 +140,24 @@ export default function NewPostScreen() {
         multiline
       />
 
-      <LinearGradient colors={['#1db954', '#000']} style={styles.postButton}>
-        <TouchableOpacity onPress={handlePost} disabled={uploading}>
-          <Text style={styles.postButtonText}>
-            {uploading ? 'Uploading...' : 'Post'}
-          </Text>
-        </TouchableOpacity>
-      </LinearGradient>
+      <TouchableOpacity onPress={handlePost} style={styles.postButton} disabled={uploading}>
+        <Text style={styles.postButtonText}>
+          {uploading ? 'Uploading...' : 'Post'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingTop: 60, paddingHorizontal: 20, backgroundColor: '#fff' },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, color: '#1db954', textAlign: 'center' },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#1db954',
+    textAlign: 'center',
+  },
   mediaButton: {
     backgroundColor: '#eee',
     padding: 14,
@@ -159,14 +177,10 @@ const styles = StyleSheet.create({
     height: 80,
   },
   postButton: {
+    backgroundColor: '#1db954',
+    padding: 14,
     borderRadius: 10,
-    paddingVertical: 14,
     alignItems: 'center',
-    marginTop: 10,
   },
-  postButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+  postButtonText: { color: '#fff', fontWeight: '600' },
 });
