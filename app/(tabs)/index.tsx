@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// app/(tabs)/index.tsx
 import { ResizeMode, Video } from 'expo-av';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -18,9 +19,10 @@ type Post = {
   video_url: string;
   image_url: string;
   likes: number;
-  views: number;
   created_at: string;
 };
+
+const userId = 'user123'; // Replace with actual user_id logic
 
 export default function HomeScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -28,17 +30,22 @@ export default function HomeScreen() {
 
   const fetchFeed = async () => {
     try {
-      const token = await AsyncStorage.getItem('token');
-      const userId = await AsyncStorage.getItem('user_id');
-      if (!token || !userId) throw new Error('Missing auth');
-
-      const res = await fetch(`http://localhost:3000/api/posts/feed/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(`http://192.168.0.100:3000/api/posts/feed/${userId}`);
       const data = await res.json();
       setPosts(data);
     } catch (error) {
       console.error('Error fetching feed:', error);
+    }
+  };
+
+  const handleLike = async (postId: string) => {
+    try {
+      await fetch(`http://192.168.0.100:3000/api/posts/like/${postId}`, {
+        method: 'POST',
+      });
+      fetchFeed(); // Refresh likes count
+    } catch (err) {
+      console.error('Failed to like post:', err);
     }
   };
 
@@ -86,8 +93,11 @@ export default function HomeScreen() {
           )}
 
           <View style={styles.actions}>
-            <Text>♥️ {post.likes}</Text>
-            <Text>👁 {post.views}</Text>
+            <TouchableOpacity onPress={() => handleLike(post.post_id)}>
+              <Text>♥️ {post.likes}</Text>
+            </TouchableOpacity>
+            <Text>💬 0</Text>
+            <Text>🔗</Text>
           </View>
 
           {post.content && post.type !== 'blog' && (

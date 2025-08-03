@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// app/(tabs)/new.tsx
 import { ResizeMode, Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,6 +19,8 @@ export default function NewPostScreen() {
   const [caption, setCaption] = useState('');
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
+
+  const user_name = 'user123'; // 🔁 Replace with dynamic user data
 
   const pickMedia = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -44,43 +46,39 @@ export default function NewPostScreen() {
     setUploading(true);
 
     try {
-      const token = await AsyncStorage.getItem('token');
-      const userId = await AsyncStorage.getItem('user_id');
-      if (!token || !userId) throw new Error('Not authenticated');
-
       const formData = new FormData();
-      formData.append(media.type, {
+      const fileField = {
         uri: media.uri,
-        name: media.uri.split('/').pop(),
+        name: media.uri.split('/').pop() || 'media',
         type: media.type === 'video' ? 'video/mp4' : 'image/jpeg',
-      } as any);
+      };
+      formData.append(media.type, fileField as any);
 
-      const uploadRes = await fetch(`http://localhost:3000/api/posts/upload-${media.type}`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-        body: formData,
-      });
+      const uploadRes = await fetch(
+        `http://192.168.0.100:3000/api/posts/upload-${media.type}`,
+        {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
 
       const uploadData = await uploadRes.json();
       const mediaUrl = media.type === 'video' ? uploadData.videoUrl : uploadData.imageUrl;
 
       const postPayload = {
-        user_name: userId,
+        user_name,
         type: media.type,
         content: caption,
         videoUrl: media.type === 'video' ? mediaUrl : '',
         imageUrl: media.type === 'image' ? mediaUrl : '',
       };
 
-      await fetch('http://localhost:3000/api/posts', {
+      await fetch('http://192.168.0.100:3000/api/posts', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(postPayload),
       });
 
@@ -89,7 +87,7 @@ export default function NewPostScreen() {
       setCaption('');
       router.push('/');
     } catch (err) {
-      console.error('Upload failed:', err);
+      console.error(err);
       Alert.alert('Error', 'Upload failed. Try again.');
     } finally {
       setUploading(false);
@@ -128,11 +126,13 @@ export default function NewPostScreen() {
         multiline
       />
 
-      <TouchableOpacity onPress={handlePost} disabled={uploading}>
-        <LinearGradient colors={['#1db954', '#003c1b']} style={styles.postButton}>
-          <Text style={styles.postButtonText}>{uploading ? 'Uploading...' : 'Post'}</Text>
-        </LinearGradient>
-      </TouchableOpacity>
+      <LinearGradient colors={['#1db954', '#000']} style={styles.postButton}>
+        <TouchableOpacity onPress={handlePost} disabled={uploading}>
+          <Text style={styles.postButtonText}>
+            {uploading ? 'Uploading...' : 'Post'}
+          </Text>
+        </TouchableOpacity>
+      </LinearGradient>
     </View>
   );
 }
@@ -159,9 +159,14 @@ const styles = StyleSheet.create({
     height: 80,
   },
   postButton: {
-    padding: 14,
     borderRadius: 10,
+    paddingVertical: 14,
     alignItems: 'center',
+    marginTop: 10,
   },
-  postButtonText: { color: '#fff', fontWeight: '600' },
+  postButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 });
