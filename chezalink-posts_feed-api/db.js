@@ -1,5 +1,5 @@
 const { Pool } = require('pg');
-require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/.env' }); // Correct path to local .env
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -10,3 +10,4 @@ const pool = new Pool({
 });
 
 module.exports = pool;
+
