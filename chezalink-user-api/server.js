@@ -1,8 +1,7 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const profileRoutes = require('./routes/userprofileroutes');
+require ('dotenv').config({ path: './chezalink-user-api/.env'});
 
-dotenv.config(); // Load environment variables from .env
+const express = require('express');
+const profileRoutes = require('./routes/userprofileroutes');
 
 const app = express();
 const PORT = process.env.USER_PROFILE_PORT || 4001;

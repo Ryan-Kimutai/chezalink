@@ -1,22 +1,20 @@
+require ('dotenv').config({ path: './chezalink-social-api/.env'});
+
 const express = require('express');
-const dotenv = require('dotenv');
 const socialRoutes = require('./routes/social.routes');
+const verifyToken = require('../chezalink-auth-api/middleware/verifyToken');
+const jwt = require('jsonwebtoken');
 
-dotenv.config(); // Load from shared .env
-
+// Middleware to verify JWT token
 const app = express();
 const PORT = process.env.SOCIAL_API_PORT || 4002;
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  req.user = { id: 'mock-user-id', role: 'user' };
-  next();
-});
+// Middleware to verify JWT token
+app.use('/api/social', socialRoutes); // ✅ Let the router decide which routes need tokens
 
-// Routes
-app.use('/api/social', socialRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Social API running on port ${PORT}`);
+  console.log(`✅ Social API running on port ${PORT}`);
 });

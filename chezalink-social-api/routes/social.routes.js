@@ -1,12 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const socialController = require('../controllers/social.controller'); // ✅ Use this name
+const socialController = require('../controllers/social.controller');
+const verifyToken = require('../../chezalink-auth-api/middleware/verifyToken'); // ✅ Adjust path if needed
 
-// Removed verifyToken middleware for MVP testing
+// 🔒 Protected routes (require JWT token)
+router.post('/follow/:targetUser', verifyToken, socialController.followUser);
+router.delete('/unfollow/:targetUser', verifyToken, socialController.unfollowUser);
 
-router.post('/follow/:targetId', socialController.followUser);
-router.delete('/unfollow/:targetId', socialController.unfollowUser);
-router.get('/followers/:userId', socialController.getFollowers);
-router.get('/following/:userId', socialController.getFollowing);
+// 🌐 Public routes (no token needed)
+router.get('/followers/:user_name', socialController.getFollowers);
+router.get('/following/:user_name', socialController.getFollowing);
+router.get('/profile/:user_name', socialController.getUserProfile);
 
 module.exports = router;
+
+

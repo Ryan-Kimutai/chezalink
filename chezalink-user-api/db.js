@@ -1,7 +1,5 @@
 const { Pool } = require('pg');
-const dotenv = require('dotenv');
-
-dotenv.config(); // Load from shared .env
+require('dotenv').config({ path: './chezalink-user-api/.env' });
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,

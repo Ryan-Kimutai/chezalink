@@ -1,38 +1,46 @@
 const db = require('../db');
 
-exports.followUser = (followerId, followingId) => {
+exports.followUser = (followerUser, followedUser) => {
   const query = `
-    INSERT INTO follows (follower_id, following_id)
+    INSERT INTO followers (follower_user, followed_user)
     VALUES ($1, $2)
     RETURNING *;
   `;
-  return db.query(query, [followerId, followingId]).then(res => res.rows[0]);
+  return db.query(query, [followerUser, followedUser]).then(res => res.rows[0]);
 };
 
-exports.unfollowUser = (followerId, followingId) => {
+exports.unfollowUser = (followerUser, followedUser) => {
   const query = `
-    DELETE FROM follows
-    WHERE follower_id = $1 AND following_id = $2;
+    DELETE FROM followers
+    WHERE follower_user = $1 AND followed_user = $2;
   `;
-  return db.query(query, [followerId, followingId]);
+  return db.query(query, [followerUser, followedUser]);
 };
 
-exports.getFollowers = (userId) => {
+exports.getFollowers = (user_name) => {
   const query = `
-    SELECT u.id, u.email, u.role
-    FROM follows f
-    JOIN users u ON f.follower_id = u.id
-    WHERE f.following_id = $1;
+    SELECT a.user_name, a.email
+    FROM followers f
+    JOIN accounts a ON f.follower_user = a.user_name
+    WHERE f.followed_user = $1;
   `;
-  return db.query(query, [userId]).then(res => res.rows);
+  return db.query(query, [user_name]).then(res => res.rows);
 };
 
-exports.getFollowing = (userId) => {
+exports.getFollowing = (user_name) => {
   const query = `
-    SELECT u.id, u.email, u.role
-    FROM follows f
-    JOIN users u ON f.following_id = u.id
-    WHERE f.follower_id = $1;
+    SELECT a.user_name, a.email
+    FROM followers f
+    JOIN accounts a ON f.followed_user = a.user_name
+    WHERE f.follower_user = $1;
   `;
-  return db.query(query, [userId]).then(res => res.rows);
+  return db.query(query, [user_name]).then(res => res.rows);
+};
+exports.getUserProfile = (user_name) => {
+  const query = `
+    SELECT p.first_name, p.last_name, p.bio, p.county, p.date_of_birth, p.account_type, p.prefered_foot, p.position
+    FROM profile p
+    WHERE p.user_name = $1;
+  `;
+  return db.query(query, [user_name]).then(res => res.rows[0]);
 };
