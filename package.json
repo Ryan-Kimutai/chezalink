@@ -9,6 +9,8 @@
   "scripts": {
     "auth": "node chezalink-auth-api/server.js",
     "posts": "node chezalink-posts_feed-api/server.js",
+    "user": "node chezalink-user-api/server.js",
+    "social": "node chezalink-social-api/server.js",
     "dev": "concurrently \"npm run auth\" \"npm run posts\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
