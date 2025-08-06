@@ -7,12 +7,13 @@
   "license": "ISC",
   "keywords": [],
   "scripts": {
-    "auth": "node chezalink-auth-api/server.js",
-    "posts": "node chezalink-posts_feed-api/server.js",
-    "user": "node chezalink-user-api/server.js",
-    "social": "node chezalink-social-api/server.js",
-    "dev": "concurrently \"npm run auth\" \"npm run posts\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+     "auth": "node chezalink-auth-api/server.js",
+  "user": "node chezalink-user-api/server.js",
+  "social": "node chezalink-social-api/server.js",
+  "posts": "node chezalink-posts_feed-api/server.js",
+  "stats": "node chezalink-stats-api/server.js",
+  "tournaments": "node chezalink-tournaments-api/server.js",
+  "dev": "concurrently \"npm run auth\" \"npm run user\" \"npm run social\" \"npm run posts\" \"npm run stats\" \"npm run tournaments\""
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
