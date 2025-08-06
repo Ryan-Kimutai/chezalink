@@ -1,6 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
 import {
   Alert,
@@ -26,7 +26,15 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
+<<<<<<< HEAD:app/login.tsx
       const res = await fetch('http://10.236.120.120:5000/api/auth/login', {
+=======
+<<<<<<< HEAD:app/(auth)/login.tsx
+      const res = await fetch('http://172.20.10.14:5000/api/auth/login', {
+=======
+      const res = await fetch('http://192.168.0.110:5000/api/auth/login', {
+>>>>>>> a2df608485edc003f1030ff3bdb411a3c908c086:app/login.tsx
+>>>>>>> bfcdf81a92e81e1bdb605a785587a8fe95e5dc7b:app/(auth)/login.tsx
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -35,16 +43,31 @@ export default function LoginScreen() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Login failed');
 
-      await AsyncStorage.setItem('token', data.token);
-      await AsyncStorage.setItem('user', JSON.stringify(data.user));
+      await SecureStore.setItemAsync('token', data.token);
+      await SecureStore.setItemAsync('user', JSON.stringify(data.user));
 
       Alert.alert('Welcome back!', `Hi ${data.user.name}`);
       router.replace('/');
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'An unexpected error occurred';
-      Alert.alert('Login Failed', message);
-    } finally {
+} catch (error: any) {
+  console.error('Login error:', error);
+
+  if (error.response) {
+    // Server responded with a status other than 2xx
+    console.log('Response data:', error.response.data);
+    console.log('Status:', error.response.status);
+    console.log('Headers:', error.response.headers);
+  } else if (error.request) {
+    // Request was made but no response received
+    console.log('Request:', error.request);
+  } else {
+    // Something else caused the error
+    console.log('Error message:', error.message);
+  }
+
+  Alert.alert('Login failed', error.message || 'An unexpected error occurred.');
+}
+
+ finally {
       setLoading(false);
     }
   };

@@ -1,20 +1,31 @@
-// ✅ app/_layout.tsx
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+// app/_layout.tsx
 import { Stack } from 'expo-router';
-import { useColorScheme } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as SecureStore from 'expo-secure-store';
+import { useEffect, useState } from 'react';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await SecureStore.getItemAsync('token');
+      setIsLoggedIn(!!token);
+    };
+    checkAuth();
+  }, []);
+
+  if (isLoggedIn === null) {
+    // show loading spinner
+    return null;
+  }
 
   return (
-    <GestureHandlerRootView>
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false }}>
+      {isLoggedIn ? (
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(modals)" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
-    </GestureHandlerRootView>
+      ) : (
+        <Stack.Screen name="(auth)" />
+      )}
+    </Stack>
   );
 }
