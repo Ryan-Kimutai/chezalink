@@ -32,7 +32,11 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
+<<<<<<< HEAD:app/(auth)/register.tsx
       const res = await fetch('http://172.20.10.14:5000/api/auth/signup', {
+=======
+      const res = await fetch('http://192.168.0.110:5000/api/auth/signup', {
+>>>>>>> a2df608485edc003f1030ff3bdb411a3c908c086:app/register.tsx
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

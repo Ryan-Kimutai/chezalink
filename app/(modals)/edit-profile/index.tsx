@@ -1,18 +1,19 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    FlatList,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const counties = [
@@ -36,6 +37,17 @@ export default function EditProfileModal() {
   const [search, setSearch] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getToken = async () => {
+      const storedToken = await AsyncStorage.getItem('token');
+      console.log('📛 TOKEN:', storedToken);
+      setToken(storedToken);
+    };
+
+    getToken();
+  }, []);
 
   const filteredCounties = counties.filter((county) =>
     county.toLowerCase().includes(search.toLowerCase())
@@ -49,16 +61,47 @@ export default function EditProfileModal() {
     }
   };
 
-  const handleFinish = () => {
-    console.log({
-      firstName,
-      lastName,
-      dob,
-      position,
-      foot,
-      location,
+  const handleFinish = async () => {
+    if (!token) {
+      alert('No token found. Please log in again.');
+      return;
+    }
+
+    const payload = {
+      first_name: firstName,
+      last_name: lastName,
       bio,
-    });
+      county: location,
+      date_of_birth: dob,
+      account_type: 'player',
+      prefered_foot: foot,
+      position,
+    };
+
+    try {
+      const response = await fetch(`http://192.168.0.110:4001/api/profile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to create profile:', errorText);
+        alert('Failed to create profile');
+        return;
+      }
+
+      const data = await response.json();
+      console.log('Profile created:', data);
+      alert('Profile successfully created!');
+    } catch (error) {
+      console.error('Network error:', error);
+      alert('An error occurred while creating your profile.');
+    }
   };
 
   return (
@@ -68,11 +111,9 @@ export default function EditProfileModal() {
     >
       <View style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          {/* Header */}
           <View style={styles.header}>
             <Text style={styles.logo}>
-              ぷ Cheza
-              <Text style={{ color: '#000' }}>Link</Text>
+              ぷ Cheza<Text style={{ color: '#000' }}>Link</Text>
             </Text>
           </View>
 
@@ -80,7 +121,6 @@ export default function EditProfileModal() {
             Tell us more about yourself to complete your profile
           </Text>
 
-          {/* Full Name */}
           <Text style={styles.label}>Full Name</Text>
           <View style={styles.row}>
             <TextInput
@@ -97,18 +137,14 @@ export default function EditProfileModal() {
             />
           </View>
 
-          {/* DOB */}
           <Text style={styles.label}>Date of birth</Text>
-          <TouchableOpacity
+          <TextInput
             style={styles.fullWidthInput}
-            onPress={() => setShowDatePicker(true)}
-          >
-            <Text style={{ color: dob ? '#000' : '#888' }}>
-              {dob || 'Tap to pick your birth date'}
-            </Text>
-          </TouchableOpacity>
+            placeholder="YYYY-MM-DD"
+            value={dob}
+            onChangeText={setDob}
+          />
 
-          {/* Position & Foot */}
           <View style={styles.row}>
             <View style={{ flex: 1, marginRight: 8 }}>
               <Text style={styles.label}>Position</Text>
@@ -138,7 +174,6 @@ export default function EditProfileModal() {
             </View>
           </View>
 
-          {/* Location */}
           <Text style={styles.label}>Location (County)</Text>
           <TextInput
             style={styles.fullWidthInput}
@@ -151,7 +186,6 @@ export default function EditProfileModal() {
             onFocus={() => setShowDropdown(true)}
           />
 
-          {/* Bio */}
           <Text style={styles.label}>Bio</Text>
           <TextInput
             style={styles.bioInput}
@@ -162,7 +196,6 @@ export default function EditProfileModal() {
             onChangeText={setBio}
           />
 
-          {/* Finish Button */}
           <LinearGradient
             colors={['#1db954', '#000']}
             start={{ x: 0, y: 0 }}
@@ -175,7 +208,6 @@ export default function EditProfileModal() {
           </LinearGradient>
         </ScrollView>
 
-        {/* County Dropdown */}
         {showDropdown && (
           <View style={styles.dropdownOverlay}>
             <FlatList
@@ -198,7 +230,6 @@ export default function EditProfileModal() {
           </View>
         )}
 
-        {/* Date Picker Modal */}
         {showDatePicker && (
           <DateTimePicker
             value={dob ? new Date(dob) : new Date()}
