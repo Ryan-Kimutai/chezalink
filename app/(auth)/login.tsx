@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
 import {
   Alert,
@@ -12,54 +13,61 @@ import {
   View,
 } from 'react-native';
 
-export default function RegisterScreen() {
-  const [userName, setUserName] = useState('');
+export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleRegister = async () => {
-    if (!userName || !email || !password || !confirmPassword) {
+  const handleLogin = async () => {
+    if (!email || !password) {
       Alert.alert('Missing Fields', 'Please fill all fields.');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      Alert.alert('Password Mismatch', 'Passwords do not match.');
       return;
     }
 
     setLoading(true);
     try {
-      const res = await fetch('http://192.168.0.100:5000/api/auth/signup', {
+      const res = await fetch('http://172.20.10.14:5000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_name: userName,
-          email,
-          password,
-        }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Registration failed');
+      if (!res.ok) throw new Error(data.message || 'Login failed');
 
-      Alert.alert('Success', 'Account created! Please log in.');
-      router.replace('/login');
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Something went wrong';
-      Alert.alert('Error', message);
-    } finally {
+      await SecureStore.setItemAsync('token', data.token);
+      await SecureStore.setItemAsync('user', JSON.stringify(data.user));
+
+      Alert.alert('Welcome back!', `Hi ${data.user.name}`);
+      router.replace('/');
+} catch (error: any) {
+  console.error('Login error:', error);
+
+  if (error.response) {
+    // Server responded with a status other than 2xx
+    console.log('Response data:', error.response.data);
+    console.log('Status:', error.response.status);
+    console.log('Headers:', error.response.headers);
+  } else if (error.request) {
+    // Request was made but no response received
+    console.log('Request:', error.request);
+  } else {
+    // Something else caused the error
+    console.log('Error message:', error.message);
+  }
+
+  Alert.alert('Login failed', error.message || 'An unexpected error occurred.');
+}
+
+ finally {
       setLoading(false);
     }
   };
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.container}>
         {/* Logo/Header */}
@@ -70,16 +78,7 @@ export default function RegisterScreen() {
           </Text>
         </View>
 
-        <Text style={styles.title}>Create an Account</Text>
-
-        {/* Name */}
-        <Text style={styles.label}>Name</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="John Doe"
-          value={userName}
-          onChangeText={setUserName}
-        />
+        <Text style={styles.title}>Welcome back!</Text>
 
         {/* Email */}
         <Text style={styles.label}>Email</Text>
@@ -96,41 +95,30 @@ export default function RegisterScreen() {
         <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter a secure password"
+          placeholder="Enter your password"
           secureTextEntry
           value={password}
           onChangeText={setPassword}
         />
 
-        {/* Confirm Password */}
-        <Text style={styles.label}>Confirm Password</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Re-enter password"
-          secureTextEntry
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-        />
-
-        {/* Register Button */}
+        {/* Login Button */}
         <LinearGradient
           colors={['#1db954', '#000']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          style={styles.registerButton}
+          style={styles.loginButton}
         >
-          <TouchableOpacity onPress={handleRegister} disabled={loading}>
-            <Text style={styles.registerButtonText}>
-              {loading ? 'Registering...' : 'Register'}
+          <TouchableOpacity onPress={handleLogin} disabled={loading}>
+            <Text style={styles.loginButtonText}>
+              {loading ? 'Logging in...' : 'Login'}
             </Text>
           </TouchableOpacity>
         </LinearGradient>
 
-        {/* Navigation to Login */}
-        <TouchableOpacity onPress={() => router.push('/login')}>
+        {/* Navigation to Register */}
+        <TouchableOpacity onPress={() => router.push('/register')}>
           <Text style={styles.linkText}>
-            Already have an account?{' '}
-            <Text style={styles.linkBold}>Login</Text>
+            Don’t have an account? <Text style={styles.linkBold}>Register</Text>
           </Text>
         </TouchableOpacity>
       </View>
@@ -177,13 +165,13 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     backgroundColor: '#f9f9f9',
   },
-  registerButton: {
+  loginButton: {
     marginTop: 30,
     borderRadius: 12,
     alignItems: 'center',
     paddingVertical: 14,
   },
-  registerButtonText: {
+  loginButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,

@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -13,37 +12,45 @@ import {
   View,
 } from 'react-native';
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
+  const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email || !password) {
+  const handleRegister = async () => {
+    if (!userName || !email || !password || !confirmPassword) {
       Alert.alert('Missing Fields', 'Please fill all fields.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Password Mismatch', 'Passwords do not match.');
       return;
     }
 
     setLoading(true);
     try {
-      const res = await fetch('http://192.168.0.100:5000/api/auth/login', {
+      const res = await fetch('http://172.20.10.14:5000/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          user_name: userName,
+          email,
+          password,
+        }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Login failed');
+      if (!res.ok) throw new Error(data.message || 'Registration failed');
 
-      await AsyncStorage.setItem('token', data.token);
-      await AsyncStorage.setItem('user', JSON.stringify(data.user));
-
-      Alert.alert('Welcome back!', `Hi ${data.user.name}`);
-      router.replace('/');
+      Alert.alert('Success', 'Account created! Please log in.');
+      router.replace('/login');
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'An unexpected error occurred';
-      Alert.alert('Login Failed', message);
+        err instanceof Error ? err.message : 'Something went wrong';
+      Alert.alert('Error', message);
     } finally {
       setLoading(false);
     }
@@ -51,8 +58,8 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}
     >
       <View style={styles.container}>
         {/* Logo/Header */}
@@ -63,7 +70,16 @@ export default function LoginScreen() {
           </Text>
         </View>
 
-        <Text style={styles.title}>Welcome back!</Text>
+        <Text style={styles.title}>Create an Account</Text>
+
+        {/* Name */}
+        <Text style={styles.label}>Name</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="John Doe"
+          value={userName}
+          onChangeText={setUserName}
+        />
 
         {/* Email */}
         <Text style={styles.label}>Email</Text>
@@ -80,30 +96,41 @@ export default function LoginScreen() {
         <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter your password"
+          placeholder="Enter a secure password"
           secureTextEntry
           value={password}
           onChangeText={setPassword}
         />
 
-        {/* Login Button */}
+        {/* Confirm Password */}
+        <Text style={styles.label}>Confirm Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Re-enter password"
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+        />
+
+        {/* Register Button */}
         <LinearGradient
           colors={['#1db954', '#000']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          style={styles.loginButton}
+          style={styles.registerButton}
         >
-          <TouchableOpacity onPress={handleLogin} disabled={loading}>
-            <Text style={styles.loginButtonText}>
-              {loading ? 'Logging in...' : 'Login'}
+          <TouchableOpacity onPress={handleRegister} disabled={loading}>
+            <Text style={styles.registerButtonText}>
+              {loading ? 'Registering...' : 'Register'}
             </Text>
           </TouchableOpacity>
         </LinearGradient>
 
-        {/* Navigation to Register */}
-        <TouchableOpacity onPress={() => router.push('/register')}>
+        {/* Navigation to Login */}
+        <TouchableOpacity onPress={() => router.push('/login')}>
           <Text style={styles.linkText}>
-            Don’t have an account? <Text style={styles.linkBold}>Register</Text>
+            Already have an account?{' '}
+            <Text style={styles.linkBold}>Login</Text>
           </Text>
         </TouchableOpacity>
       </View>
@@ -150,13 +177,13 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     backgroundColor: '#f9f9f9',
   },
-  loginButton: {
+  registerButton: {
     marginTop: 30,
     borderRadius: 12,
     alignItems: 'center',
     paddingVertical: 14,
   },
-  loginButtonText: {
+  registerButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
