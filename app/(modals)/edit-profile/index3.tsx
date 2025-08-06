@@ -1,19 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import {
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    FlatList,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 const counties = [
@@ -27,8 +26,8 @@ const counties = [
 ];
 
 export default function EditProfileModal() {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [instName, setInstName] = useState('');
+  const [insttype, setInsttype] = useState('');
   const [dob, setDob] = useState('');
   const [position, setPosition] = useState('');
   const [foot, setFoot] = useState('');
@@ -66,20 +65,20 @@ export default function EditProfileModal() {
       alert('No token found. Please log in again.');
       return;
     }
-
+const username = await AsyncStorage.getItem('username');
     const payload = {
-      first_name: firstName,
-      last_name: lastName,
-      bio,
-      county: location,
-      date_of_birth: dob,
-      account_type: 'player',
-      prefered_foot: foot,
-      position,
+        user_name:username,
+      institution_name:instName,
+      bio:bio,
+      county:location,
+      institution_type:insttype,
+      founded_year:dob,
+      account_type: 'institution',
+     
     };
 
     try {
-      const response = await fetch(`http://192.168.0.110:4001/api/profile`, {
+      const response = await fetch(`http://10.236.120.120:4001/api/profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -118,61 +117,33 @@ export default function EditProfileModal() {
           </View>
 
           <Text style={styles.title}>
-            Tell us more about yourself to complete your profile
+            Tell us more to complete your institution's profile
           </Text>
 
-          <Text style={styles.label}>Full Name</Text>
+          <Text style={styles.label}>Name of institution</Text>
           <View style={styles.row}>
             <TextInput
-              style={[styles.input, { marginRight: 8 }]}
-              placeholder="First name"
-              value={firstName}
-              onChangeText={setFirstName}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Last name"
-              value={lastName}
-              onChangeText={setLastName}
+              style={styles.fullWidthInput}
+              placeholder="e.g ChezaFootball sc"
+              value={instName}
+              onChangeText={setInstName}
             />
           </View>
 
-          <Text style={styles.label}>Date of birth</Text>
+          <Text style={styles.label}>Founding Year</Text>
           <TextInput
             style={styles.fullWidthInput}
             placeholder="YYYY-MM-DD"
             value={dob}
             onChangeText={setDob}
           />
-
-          <View style={styles.row}>
-            <View style={{ flex: 1, marginRight: 8 }}>
-              <Text style={styles.label}>Position</Text>
-              <Picker
-                selectedValue={position}
-                onValueChange={setPosition}
-                style={styles.picker}
-              >
-                <Picker.Item label="GK/DF/MID/FW" value="" />
-                <Picker.Item label="Goalkeeper" value="GK" />
-                <Picker.Item label="Defender" value="DF" />
-                <Picker.Item label="Midfielder" value="MID" />
-                <Picker.Item label="Forward" value="FW" />
-              </Picker>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.label}>Preferred foot</Text>
-              <Picker
-                selectedValue={foot}
-                onValueChange={setFoot}
-                style={styles.picker}
-              >
-                <Picker.Item label="Left/Right" value="" />
-                <Picker.Item label="Left" value="Left" />
-                <Picker.Item label="Right" value="Right" />
-              </Picker>
-            </View>
-          </View>
+             <Text style={styles.label}>Type of institution</Text>
+          <TextInput
+            style={styles.fullWidthInput}
+            placeholder="e.g academy"
+            value={insttype}
+            onChangeText={setInsttype}
+          />
 
           <Text style={styles.label}>Location (County)</Text>
           <TextInput
@@ -191,7 +162,7 @@ export default function EditProfileModal() {
             style={styles.bioInput}
             multiline
             numberOfLines={4}
-            placeholder="Give us a brief description of yourself on the pitch"
+            placeholder="A brief description of the Institution"
             value={bio}
             onChangeText={setBio}
           />

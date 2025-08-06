@@ -2,8 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-const BASE_URL = 'http://192.168.0.110';
-const PROFILE_API = `${BASE_URL}:4001/api/me`;
+const BASE_URL = 'http://10.236.120.120';
+const PROFILE_API = `${BASE_URL}:4001/api/profile`;
 const SOCIAL_PROFILE_API = (username: string) => `${BASE_URL}:4002/api/social/profile/${username}`;
 
 const ProfileScreen = ({ route }: any) => {
@@ -16,9 +16,7 @@ const ProfileScreen = ({ route }: any) => {
   const fetchData = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        throw new Error('No token found in AsyncStorage');
-      }
+      if (!token) throw new Error('No token found in AsyncStorage');
 
       const headers = {
         'Content-Type': 'application/json',
@@ -26,31 +24,19 @@ const ProfileScreen = ({ route }: any) => {
       };
 
       const apiUrl = targetUser ? SOCIAL_PROFILE_API(targetUser) : PROFILE_API;
-
-      console.log('🔑 Token:', token);
-      console.log('🌐 API URL:', apiUrl);
-
       const res = await fetch(apiUrl, { headers });
 
       if (!res.ok) {
         const errorText = await res.text();
-        console.error('❌ API Error:', res.status, errorText);
-
-        if (res.status === 404) {
-          setErrorMessage('Profile not found');
-        } else if (res.status === 401) {
-          setErrorMessage('Unauthorized. Please log in again.');
-        } else {
-          setErrorMessage('Something went wrong.');
-        }
-
+        if (res.status === 404) setErrorMessage('Profile not found');
+        else if (res.status === 401) setErrorMessage('Unauthorized. Please log in again.');
+        else setErrorMessage('Something went wrong.');
         return;
       }
 
       const data = await res.json();
       setProfile(data);
     } catch (error: any) {
-      console.error('❌ Fetch Error:', error.message);
       setErrorMessage('Network error. Please check your connection or server.');
     } finally {
       setLoading(false);
@@ -87,13 +73,37 @@ const ProfileScreen = ({ route }: any) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>{profile.first_name} {profile.last_name}</Text>
+      <Text style={styles.title}>
+        {profile.account_type === 'institution' ? profile.institution_name : `${profile.first_name} ${profile.last_name}`}
+      </Text>
+      
       <Text style={styles.label}>Bio: <Text style={styles.value}>{profile.bio}</Text></Text>
       <Text style={styles.label}>County: <Text style={styles.value}>{profile.county}</Text></Text>
-      <Text style={styles.label}>DOB: <Text style={styles.value}>{profile.date_of_birth}</Text></Text>
       <Text style={styles.label}>Account Type: <Text style={styles.value}>{profile.account_type}</Text></Text>
-      <Text style={styles.label}>Preferred Foot: <Text style={styles.value}>{profile.prefered_foot}</Text></Text>
-      <Text style={styles.label}>Position: <Text style={styles.value}>{profile.position}</Text></Text>
+
+      {profile.account_type === 'player' && (
+        <>
+          <Text style={styles.label}>DOB: <Text style={styles.value}>{profile.date_of_birth}</Text></Text>
+          <Text style={styles.label}>Preferred Foot: <Text style={styles.value}>{profile.prefered_foot}</Text></Text>
+          <Text style={styles.label}>Position: <Text style={styles.value}>{profile.position}</Text></Text>
+        </>
+      )}
+
+      {profile.account_type === 'scout' && (
+        <>
+          <Text style={styles.label}>DOB: <Text style={styles.value}>{profile.date_of_birth}</Text></Text>
+          <Text style={styles.label}>Organization: <Text style={styles.value}>{profile.organization}</Text></Text>
+          <Text style={styles.label}>Experience (Years): <Text style={styles.value}>{profile.experience_years}</Text></Text>
+          <Text style={styles.label}>Specialization: <Text style={styles.value}>{profile.specialization}</Text></Text>
+        </>
+      )}
+
+      {profile.account_type === 'institution' && (
+        <>
+          <Text style={styles.label}>Institution Type: <Text style={styles.value}>{profile.institution_type}</Text></Text>
+          <Text style={styles.label}>Founded Year: <Text style={styles.value}>{profile.founded_year}</Text></Text>
+        </>
+      )}
     </ScrollView>
   );
 };
