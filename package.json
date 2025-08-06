@@ -1,0 +1,28 @@
+{
+  "name": "chezalink-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start:auth": "node ./chezalink-auth-api/server.js",
+    "start:user": "node ./chezalink-user-api/server.js",
+    "start:social": "node ./chezalink-social-api/server.js",
+    "start:all": "concurrently \"npm run start:auth\" \"npm run start:user\" \"npm run start:social\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.1"
+  }
+}
+
