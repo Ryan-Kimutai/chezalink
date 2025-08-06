@@ -11,8 +11,6 @@
   "user": "node chezalink-user-api/server.js",
   "social": "node chezalink-social-api/server.js",
   "posts": "node chezalink-posts_feed-api/server.js",
-  "stats": "node chezalink-stats-api/server.js",
-  "tournaments": "node chezalink-tournaments-api/server.js",
   "dev": "concurrently \"npm run auth\" \"npm run user\" \"npm run social\" \"npm run posts\" \"npm run stats\" \"npm run tournaments\""
   },
   "dependencies": {
