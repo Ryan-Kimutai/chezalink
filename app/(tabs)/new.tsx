@@ -80,8 +80,8 @@ export default function CreatePostScreen() {
 
     const endpoint =
       media.type === 'image'
-        ? 'http://172.20.10.14:3000/api/posts/upload-image'
-        : 'http://172.20.10.14:3000/api/posts/upload-video';
+        ? 'http://10.97.227.154:3000/api/posts/upload-image'
+        : 'http://10.97.227.154:3000/api/posts/upload-video';
 
    const response = await axios.post(endpoint, formData,{
     headers: {
@@ -111,7 +111,7 @@ export default function CreatePostScreen() {
   videoUrl: videoUrl || '',
   imageUrl: imageUrl || ''
 };
-      await axios.post('http://172.20.10.14:3000/api/posts', postData);
+      await axios.post('http://10.97.227.154:3000/api/posts', postData);
 
       Alert.alert('Post created successfully');
       setMedia(null);

@@ -26,15 +26,7 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-<<<<<<< HEAD:app/login.tsx
-      const res = await fetch('http://10.236.120.120:5000/api/auth/login', {
-=======
-<<<<<<< HEAD:app/(auth)/login.tsx
-      const res = await fetch('http://172.20.10.14:5000/api/auth/login', {
-=======
-      const res = await fetch('http://192.168.0.110:5000/api/auth/login', {
->>>>>>> a2df608485edc003f1030ff3bdb411a3c908c086:app/login.tsx
->>>>>>> bfcdf81a92e81e1bdb605a785587a8fe95e5dc7b:app/(auth)/login.tsx
+      const res = await fetch('http://10.97.227.154:5000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -49,23 +41,33 @@ export default function LoginScreen() {
       Alert.alert('Welcome back!', `Hi ${data.user.name}`);
       router.replace('/');
 } catch (error: any) {
-  console.error('Login error:', error);
+  console.error('❌ Login error:', error);
 
-  if (error.response) {
-    // Server responded with a status other than 2xx
+  if (error.name === 'TypeError' && error.message === 'Network request failed') {
+    console.log(
+      '⚠️ Network request failed. This is often due to:\n' +
+      '- Backend server being offline\n' +
+      '- Incorrect API URL or IP (e.g., IP changed or emulator not using correct localhost)\n' +
+      '- Device/emulator not connected to same Wi-Fi as local server\n' +
+      '- CORS/network security restrictions (especially on real devices)'
+    );
+    Alert.alert('Connection Error', 'Unable to reach server. Please check your network or server status.');
+  } else if (error.response) {
+    console.log('❗ Server responded with an error:');
     console.log('Response data:', error.response.data);
     console.log('Status:', error.response.status);
     console.log('Headers:', error.response.headers);
+    Alert.alert('Login Failed', error.response.data?.message || 'Invalid credentials.');
   } else if (error.request) {
-    // Request was made but no response received
-    console.log('Request:', error.request);
+    console.log('📡 Request made but no response received. Possible server downtime.');
+    console.log('Request details:', error.request);
+    Alert.alert('No Response', 'Server did not respond. Please try again later.');
   } else {
-    // Something else caused the error
-    console.log('Error message:', error.message);
+    console.log('🧨 Unknown error occurred:', error.message);
+    Alert.alert('Unexpected Error', error.message || 'Something went wrong. Try again.');
   }
-
-  Alert.alert('Login failed', error.message || 'An unexpected error occurred.');
 }
+
 
  finally {
       setLoading(false);
