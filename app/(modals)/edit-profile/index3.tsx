@@ -1,6 +1,7 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
     FlatList,
@@ -37,16 +38,32 @@ export default function EditProfileModal() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [userName, setUserName] = useState('');
 
-  useEffect(() => {
-    const getToken = async () => {
-      const storedToken = await AsyncStorage.getItem('token');
-      console.log('📛 TOKEN:', storedToken);
-      setToken(storedToken);
-    };
 
-    getToken();
-  }, []);
+ useEffect(() => {
+  const getToken = async () => {
+    const storedToken = await SecureStore.getItemAsync('token');
+    console.log('📛 TOKEN:', storedToken);
+    setToken(storedToken);
+  };
+
+  const init = async () => {
+    const storedUser = await SecureStore.getItemAsync('user');
+    let name = '';
+    if (storedUser) {
+      try {
+        name = JSON.parse(storedUser).name || '';
+      } catch {
+        name = '';
+      }
+    }
+    setUserName(name);
+  };
+
+  getToken();
+  init();
+}, []);
 
   const filteredCounties = counties.filter((county) =>
     county.toLowerCase().includes(search.toLowerCase())
@@ -65,9 +82,8 @@ export default function EditProfileModal() {
       alert('No token found. Please log in again.');
       return;
     }
-const username = await AsyncStorage.getItem('username');
     const payload = {
-        user_name:username,
+        user_name:userName,
       institution_name:instName,
       bio:bio,
       county:location,

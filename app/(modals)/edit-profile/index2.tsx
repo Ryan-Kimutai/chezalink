@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
@@ -38,18 +38,33 @@ export default function EditProfileModal() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [token, setToken] = useState<string | null>(null);
-
+ const [userName, setUserName] = useState('');
   
+ 
   useEffect(() => {
-    const getToken = async () => {
-      const storedToken = await AsyncStorage.getItem('token');
-      console.log('📛 TOKEN:', storedToken);
-      setToken(storedToken);
-    };
-
-    getToken();
-  }, []);
-
+   const getToken = async () => {
+     const storedToken = await SecureStore.getItemAsync('token');
+     console.log('📛 TOKEN:', storedToken);
+     setToken(storedToken);
+   };
+ 
+   const init = async () => {
+     const storedUser = await SecureStore.getItemAsync('user');
+     let name = '';
+     if (storedUser) {
+       try {
+         name = JSON.parse(storedUser).name || '';
+       } catch {
+         name = '';
+       }
+     }
+     setUserName(name);
+   };
+ 
+   getToken();
+   init();
+ }, []);
+ 
   const filteredCounties = counties.filter((county) =>
     county.toLowerCase().includes(search.toLowerCase())
   );
@@ -67,14 +82,10 @@ export default function EditProfileModal() {
       alert('No token found. Please log in again.');
       return;
     }
-  const username = await AsyncStorage.getItem('username');
-     if (!username) {
-  console.error('❌ Username is null or undefined');
-  alert('Could not retrieve your username. Please login again.');
-  return;
+
 }
     const payload = {
-      user_name:username,
+      user_name:userName,
       first_name: firstName,
       last_name: lastName,
       bio,
@@ -85,7 +96,7 @@ export default function EditProfileModal() {
       experience_years: exyears,
       specialization,
     };
-  console.log('Username:', username);
+  console.log('Username:', userName);
 console.log('Token:', token);
 console.log('Payload:', payload);
 
