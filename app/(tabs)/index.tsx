@@ -2,18 +2,16 @@ import { Feather, FontAwesome } from '@expo/vector-icons';
 import { ResizeMode, Video } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as SecureStore from 'expo-secure-store';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
-  FlatList,
   Image,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
-import { InView } from 'react-native-intersection-observer';
-
 type Post = {
   post_id: string;
   user_name: string;
@@ -26,51 +24,19 @@ type Post = {
   is_liked: boolean;
 };
 
-const LIMIT = 10;
-
 export default function HomeScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [userName, setUserName] = useState('');
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const loadingRef = useRef(false);
 
-  const fetchFeed = async (name: string, reset = false) => {
-    if (loadingRef.current || (!reset && !hasMore)) return;
-    loadingRef.current = true;
+  const fetchFeed = async (name: string) => {
     try {
-      const res = await fetch(
-        `http://10.97.227.154:3000/api/posts/feed?user_name=${name}&limit=${LIMIT}&offset=${reset ? 0 : offset}`
-      );
+      const res = await fetch(`http://192.168.0.106:3000/api/posts/feed?user_name=${name}`);
       const data = await res.json();
-      setPosts(prev => (reset ? data : [...prev, ...data]));
-      setHasMore(data.length === LIMIT);
-      if (!reset) setOffset(prev => prev + LIMIT);
-   } catch (error: any) {
-  console.error('❌ Failed to fetch feed from backend.');
-  console.error('➡️ Endpoint:', `http://10.97.227.154:3000/api/posts/feed?user_name=${name}&limit=${LIMIT}&offset=${reset ? 0 : offset}`);
-  console.error('🕵️ Error Type:', typeof error);
-  console.error('📄 Error Message:', error?.message || 'No message provided');
-  console.error('📦 Full Error Object:', error);
-
-  if (error instanceof TypeError && error.message.includes('Network request failed')) {
-    console.error('🌐 Network Error: Could not reach the server.');
-    console.error('🔍 Possible causes:');
-    console.error('- The backend server is not running or not reachable.');
-    console.error('- Incorrect IP address or port.');
-    console.error('- Device is offline or disconnected from local network.');
-    console.error('- Request blocked by CORS or firewall.');
-
-    console.error('✅ Suggested fixes:');
-    console.error('- Ensure your server at 10.97.227.154:3000 is running.');
-    console.error('- Verify your device is connected to the same network.');
-    console.error('- Try pinging the backend from your mobile device or emulator.');
-  }
-}
-finally {
-      loadingRef.current = false;
-      setRefreshing(false);
+      console.log('Fetched feed:', data);
+      setPosts(data);
+    } catch (error) {
+      console.error('Error fetching feed:', error);
     }
   };
 
@@ -79,30 +45,38 @@ finally {
       const storedUser = await SecureStore.getItemAsync('user');
       const name = storedUser ? JSON.parse(storedUser).name : '';
       setUserName(name);
-      if (name) fetchFeed(name, true);
-    } catch (err) {
-      console.error('Failed to retrieve user name:', err);
-    }
+      if (name) fetchFeed(name);
+   } catch (err: unknown) {
+  if (err instanceof SyntaxError) {
+    console.error('Failed to parse stored user data. Possible malformed JSON:', err.message);
+  } else if (err instanceof Error) {
+    console.error(`Failed to retrieve user name from SecureStore: ${err.message}`);
+  } else {
+    console.error('An unknown error occurred while retrieving user name:', err);
+  }
+}
+
   };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    if (userName) {
+      fetchFeed(userName).finally(() => setRefreshing(false));
+    } else {
+      setRefreshing(false);
+    }
+  }, [userName]);
 
   useEffect(() => {
     loadUser();
   }, []);
-
-  const onRefresh = useCallback(() => {
-    if (userName) {
-      setRefreshing(true);
-      setOffset(0);
-      fetchFeed(userName, true);
-    }
-  }, [userName]);
 
   const handleLikeToggle = async (postId: string, currentlyLiked: boolean) => {
     try {
       const storedUser = await SecureStore.getItemAsync('user');
       const name = storedUser ? JSON.parse(storedUser).name : '';
 
-      const url = `http://10.97.227.154:3000/api/posts/like/${postId}`;
+      const url = `http://192.168.0.106:3000/api/posts/like/${postId}`;
       const options = {
         method: currentlyLiked ? 'DELETE' : 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -123,98 +97,124 @@ finally {
             : p
         )
       );
-    } catch (err) {
-      console.error('Error toggling like:', err);
-    }
-  };
+   } catch (error: any) {
+  console.error('❌ Error fetching feed:', error);
 
-  const renderItem = ({ item }: { item: Post }) => {
-    return (
-      <View style={styles.post}>
-        <Text style={styles.username}>@{item.user_name}</Text>
-
-      {item.type === 'video' && item.video_url && (
-<InView triggerOnce={false} threshold={0.8}>
-  {(props) => (
-    <View ref={(props as any).ref}>
-      <Video
-        source={{ uri: item.video_url || '' }}
-        style={styles.media}
-        resizeMode={ResizeMode.COVER}
-        useNativeControls
-        isLooping
-        shouldPlay={props.inView}
-      />
-    </View>
-  )}
-</InView>
-
-
-
-)}
-
-
-        {item.type === 'image' && item.image_url && (
-          <Image source={{ uri: item.image_url }} style={styles.media} />
-        )}
-
-        {item.type === 'blog' && (
-          <Text style={styles.blogContent}>{item.content}</Text>
-        )}
-
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={() => handleLikeToggle(item.post_id, item.is_liked)}
-          >
-            <FontAwesome
-              name={item.is_liked ? 'heart' : 'heart-o'}
-              size={20}
-              color={item.is_liked ? 'transparent' : '#555'}
-            />
-            {item.is_liked && (
-              <LinearGradient
-                colors={['#1db954', '#000']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={[StyleSheet.absoluteFill, { borderRadius: 10 }]}
-              />
-            )}
-            <Text style={styles.iconText}>{item.likes}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.iconButton}>
-            <Feather name="message-circle" size={20} color="#555" />
-            <Text style={styles.iconText}>0</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.iconButton}>
-            <Feather name="share-2" size={20} color="#555" />
-          </TouchableOpacity>
-        </View>
-
-        {item.content && item.type !== 'blog' && (
-          <Text style={styles.caption}>{item.content}</Text>
-        )}
-      </View>
+  if (error.name === 'TypeError' && error.message === 'Network request failed') {
+    console.log(
+      '⚠️ Network request failed. This is commonly caused by:\n' +
+      '- 🔌 Backend server not running or unreachable\n' +
+      '- 🧭 Incorrect API URL (e.g., wrong IP address or port)\n' +
+      '- 🌐 Device/emulator not connected to the same Wi-Fi network as the backend\n' +
+      '- 🛑 Using localhost (127.0.0.1) instead of your machine\'s IP address on physical devices\n' +
+      '- 🔒 Firewall blocking the connection'
     );
+    alert('Unable to connect to the server. Please check your internet or server settings.');
+  } else if (error instanceof SyntaxError) {
+    console.log(
+      '🧩 Failed to parse server response as JSON. This might mean:\n' +
+      '- The server responded with malformed JSON\n' +
+      '- A non-JSON error (like HTML) was returned due to a crash or CORS issue'
+    );
+    alert('Unexpected server response format. Please contact the developer.');
+  } else {
+    console.log('🧨 An unexpected error occurred:', error.message);
+    alert(`An error occurred: ${error.message || 'Unknown error'}`);
+  }
+}
+
   };
 
   return (
-    <FlatList
-      data={posts}
-      keyExtractor={item => item.post_id}
-      renderItem={renderItem}
-      contentContainerStyle={styles.container}
+    <ScrollView
+      style={styles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      onEndReached={() => userName && fetchFeed(userName)}
-      onEndReachedThreshold={0.5}
-    />
+    >
+      <View style={styles.header}>
+        <Text style={styles.logo}>
+          ぷ Cheza
+          <Text style={{ color: '#000' }}>Link</Text>
+        </Text>
+      </View>
+
+      {posts.map((post: any) => (
+        <View key={post.post_id} style={styles.post}>
+          <Text style={styles.username}>@{post.user_name}</Text>
+
+          {post.type === 'video' && post.video_url && (
+            <Video
+              source={{ uri: post.video_url }}
+              style={styles.media}
+              resizeMode={ResizeMode.COVER}
+              useNativeControls
+              isLooping
+            />
+          )}
+
+          {post.type === 'image' && post.image_url && (
+            <Image source={{ uri: post.image_url }} style={styles.media} />
+          )}
+
+          {post.type === 'blog' && (
+            <Text style={styles.blogContent}>{post.content}</Text>
+          )}
+
+          <View style={styles.actions}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => handleLikeToggle(post.post_id, post.is_liked)}
+            >
+              {post.is_liked ? (
+                <LinearGradient
+                  colors={['#1db954', '#000']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.gradientIcon}
+                >
+                  <FontAwesome name="heart" size={20} color="#fff" />
+                </LinearGradient>
+              ) : (
+                <FontAwesome name="heart-o" size={20} color="#555" />
+              )}
+              <Text style={styles.iconText}>{post.likes}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.iconButton}>
+              <Feather name="message-circle" size={20} color="#555" />
+              <Text style={styles.iconText}>0</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.iconButton}>
+              <Feather name="share-2" size={20} color="#555" />
+            </TouchableOpacity>
+          </View>
+
+          {post.content && post.type !== 'blog' && (
+            <Text style={styles.caption}>{post.content}</Text>
+          )}
+        </View>
+      ))}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16, backgroundColor: '#f7f7f7' },
+  container: { flex: 1, padding: 16, backgroundColor: '#f7f7f7' },
+  header: {
+    paddingTop: 50,
+    paddingBottom: 12,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
+    backgroundColor: '#fff',
+  },
+  logo: {
+    fontSize: 24,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+    color: '#1db954',
+    fontFamily: 'sans-serif-condensed',
+  },
   post: {
     marginBottom: 30,
     paddingHorizontal: 16,
@@ -254,11 +254,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    position: 'relative',
   },
   iconText: {
     fontSize: 14,
     color: '#333',
+  },
+  gradientIcon: {
+    borderRadius: 100,
+    padding: 6,
   },
   caption: {
     fontSize: 14,
