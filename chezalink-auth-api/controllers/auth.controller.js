@@ -6,7 +6,11 @@ require('dotenv').config(); // Load environment variables
 // Generate JWT token using user ID and email
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.user_name, email: user.email },
+     {
+      id: user.user_name,           // can keep for backward compatibility
+      email: user.email,
+      user_name: user.user_name     // ✅ ADD THIS!
+    },
     process.env.JWT_SECRET,
     { expiresIn: '1w' } // Temporary token expiration of 1 week will change in production to 1h
   );

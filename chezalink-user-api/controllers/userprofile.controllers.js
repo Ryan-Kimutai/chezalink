@@ -64,11 +64,9 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-console.log('Decoded user:', req.user);
-
 // Update profile
 exports.updateProfile = async (req, res) => {
-  const user_name = req.user?.user_name;
+  const user_name = req.params.user_name;
   const newData = req.body;
 
   if (!user_name) {

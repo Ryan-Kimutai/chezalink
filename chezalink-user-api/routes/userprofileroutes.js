@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const verifyToken = require('./middleware/verifyToken'); 
+const verifyToken = require('../../chezalink-auth-api/middleware/verifyToken'); 
 
 const {
   createProfile,          // Handles both base and type-specific data together

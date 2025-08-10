@@ -40,7 +40,7 @@ exports.unfollowUser = async (req, res) => {
 
 // Get followers of a user
 exports.getFollowers = async (req, res) => {
-  const user_name = req.params.targetUser;
+  const user_name = req.params.user_name;
 
   try {
     const followers = await service.getFollowers(user_name);
@@ -53,7 +53,7 @@ exports.getFollowers = async (req, res) => {
 
 // Get users followed by a user
 exports.getFollowing = async (req, res) => {
-  const user_name = req.params.targetUser;
+  const user_name = req.params.user_name;
 
   try {
     const following = await service.getFollowing(user_name);
@@ -64,19 +64,23 @@ exports.getFollowing = async (req, res) => {
   }
 };
 
-// Get profile for a user
-exports.getUserProfile = async (req, res) => {
-  const user_name = req.params.user_name;
+// Controller to get a user profile by username
+// controllers/userprofile.controllers.js
+const { getUserProfileByUsername } = require('../services/userprofile.services');
 
+exports.getProfile = async (req, res) => {
   try {
-    const profile = await service.getUserProfile(user_name);
+    const { user_name } = req.params;
+    const profile = await getUserProfileByUsername(user_name);
+
     if (!profile) {
-      return res.status(404).json({ error: 'User profile not found' });
+      return res.status(404).json({ message: 'User not found' });
     }
-    res.status(200).json(profile);
-  } catch (err) {
-    console.error('Get profile error:', err);
-    res.status(500).json({ error: 'Server error.' });
+
+    res.json(profile);
+  } catch (error) {
+    console.error('Error in getProfile controller:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 

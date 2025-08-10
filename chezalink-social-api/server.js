@@ -1,4 +1,4 @@
-require ('dotenv').config({ path: './chezalink-social-api/.env'});
+require ('dotenv').config();
 
 const cors = require('cors');
 const express = require('express');
