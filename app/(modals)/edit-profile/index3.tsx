@@ -4,16 +4,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
-    FlatList,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const counties = [
@@ -94,7 +94,7 @@ export default function EditProfileModal() {
     };
 
     try {
-      const response = await fetch(`http://10.236.120.120:4001/api/profile`, {
+      const response = await fetch(`http://172.20.10.14:4001/api/profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

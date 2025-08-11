@@ -1,18 +1,18 @@
-import * as SecureStore from 'expo-secure-store';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
-    FlatList,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const counties = [
@@ -78,53 +78,53 @@ export default function EditProfileModal() {
   };
 
   const handleFinish = async () => {
-    if (!token) {
-      alert('No token found. Please log in again.');
+  if (!token) {
+    alert('No token found. Please log in again.');
+    return;
+  }
+
+  const payload = {
+    user_name: userName,
+    first_name: firstName,
+    last_name: lastName,
+    bio,
+    county: location,
+    date_of_birth: dob,
+    account_type: 'scout',
+    organization,
+    experience_years: exyears,
+    specialization,
+  };
+
+  console.log('Username:', userName);
+  console.log('Token:', token);
+  console.log('Payload:', payload);
+
+  try {
+    const response = await fetch(`http://10.236.120.120:4001/api/profile`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Failed to create profile:', errorText);
+      alert('Failed to create profile');
       return;
     }
 
-}
-    const payload = {
-      user_name:userName,
-      first_name: firstName,
-      last_name: lastName,
-      bio,
-      county: location,
-      date_of_birth: dob,
-      account_type: 'scout',
-      organization:organization,
-      experience_years: exyears,
-      specialization,
-    };
-  console.log('Username:', userName);
-console.log('Token:', token);
-console.log('Payload:', payload);
-
-    try {
-      const response = await fetch(`http://10.236.120.120:4001/api/profile`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Failed to create profile:', errorText);
-        alert('Failed to create profile');
-        return;
-      }
-
-      const data = await response.json();
-      console.log('Profile created:', data);
-      alert('Profile successfully created!');
-    } catch (error) {
-      console.error('Network error:', error);
-      alert('An error occurred while creating your profile.');
-    }
-  };
+    const data = await response.json();
+    console.log('Profile created:', data);
+    alert('Profile successfully created!');
+  } catch (error) {
+    console.error('Network error:', error);
+    alert('An error occurred while creating your profile.');
+  }
+};
 
   return (
     <KeyboardAvoidingView

@@ -40,31 +40,28 @@ export default function EditProfileModal() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [token, setToken] = useState<string | null>(null);
 
- useEffect(() => {
-  const getToken = async () => {
-    const storedToken = await SecureStore.getItemAsync('token');
-    console.log('📛 TOKEN:', storedToken);
-    setToken(storedToken);
-  };
-
+useEffect(() => {
   const init = async () => {
+    const storedToken = await SecureStore.getItemAsync('token');
     const storedUser = await SecureStore.getItemAsync('user');
-    let name = '';
+
+    if (storedToken) setToken(storedToken);
+
     if (storedUser) {
       try {
-        name = JSON.parse(storedUser).name || '';
+        const parsedUser = JSON.parse(storedUser);
+
+        console.log('🔍 Stored user in SecureStore:', parsedUser); // ✅ ADD HERE
+
+        setUserName(parsedUser.name || ''); // ✅ pull from user object
       } catch {
-        name = '';
+        setUserName('');
       }
     }
-    setUserName(name);
   };
 
-  getToken();
   init();
 }, []);
-
-
   const filteredCounties = counties.filter((county) =>
     county.toLowerCase().includes(search.toLowerCase())
   );
@@ -78,48 +75,74 @@ export default function EditProfileModal() {
   };
 
   const handleFinish = async () => {
-    if (!token) {
-      alert('No token found. Please log in again.');
+  // Get token & user_name from SecureStore
+  const storedToken = await SecureStore.getItemAsync('token');
+  const storedUser = await SecureStore.getItemAsync('user');
+
+  if (!storedToken) {
+    alert('No token found. Please log in again.');
+    return;
+  }
+
+  let finalUserName = userName;
+  if (storedUser) {
+    try {
+      const parsedUser = JSON.parse(storedUser);
+      finalUserName = parsedUser.user_name || userName;
+    } catch {
+      console.warn('⚠️ Could not parse stored user');
+    }
+  }
+
+  if (!finalUserName) {
+    alert('No username found. Please log in again.');
+    return;
+  }
+
+  const payload = {
+    user_name: finalUserName,
+    account_type: 'player',
+    first_name: firstName,
+    last_name: lastName,
+    bio,
+    county: location,
+    date_of_birth: dob,
+    prefered_foot: foot,
+    position,
+  };
+
+  console.log('📤 Sending profile payload:', payload);
+
+  try {
+    const response = await fetch(`http://192.168.0.106:4001/api/profile`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${storedToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Failed to create profile:', errorText);
+      alert(`Failed to create profile: ${errorText}`);
       return;
     }
 
-    const payload = {
-      user_name:userName,
-      first_name: firstName,
-      last_name: lastName,
-      bio,
-      county: location,
-      date_of_birth: dob,
-      account_type: 'player',
-      prefered_foot: foot,
-      position,
-    };
+    const data = await response.json();
+    console.log('✅ Profile created:', data);
+    alert('Profile successfully created!');
+  } catch (error: any) {
+    console.error('🚨 PROFILE CREATION ERROR:', error);
+    alert(
+      `An error occurred while creating your profile.\nError: ${
+        error?.message || 'Unknown error'
+      }`
+    );
+  }
+};
 
-    try {
-      const response = await fetch(`http://192.168.0.110:4001/api/profile`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Failed to create profile:', errorText);
-        alert('Failed to create profile');
-        return;
-      }
-
-      const data = await response.json();
-      console.log('Profile created:', data);
-      alert('Profile successfully created!');
-    } catch (error) {
-      console.error('Network error:', error);
-      alert('An error occurred while creating your profile.');
-    }
-  };
 
   return (
     <KeyboardAvoidingView

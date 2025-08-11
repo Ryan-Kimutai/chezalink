@@ -1,8 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-const BASE_URL = 'http://10.236.120.120';
+const BASE_URL = 'http://192.168.0.106';
 const PROFILE_API = `${BASE_URL}:4001/api/profile`;
 const SOCIAL_PROFILE_API = (username: string) => `${BASE_URL}:4002/api/social/profile/${username}`;
 
@@ -15,16 +15,24 @@ const ProfileScreen = ({ route }: any) => {
 
   const fetchData = async () => {
     try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) throw new Error('No token found in AsyncStorage');
+     const token = await SecureStore.getItemAsync('token');
+if (!token) throw new Error('No token found in SecureStore');
 
-      const headers = {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      };
+const storedUser = await SecureStore.getItemAsync('user');
+if (!storedUser) throw new Error('No user found in SecureStore');
+const parsedUser = JSON.parse(storedUser);
 
-      const apiUrl = targetUser ? SOCIAL_PROFILE_API(targetUser) : PROFILE_API;
-      const res = await fetch(apiUrl, { headers });
+const headers = {
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${token}`,
+};
+
+const apiUrl = targetUser
+  ? SOCIAL_PROFILE_API(targetUser)
+  : `${PROFILE_API}/${parsedUser.name}`; // match login.tsx profile check
+
+const res = await fetch(apiUrl, { headers });
+
 
       if (!res.ok) {
         const errorText = await res.text();

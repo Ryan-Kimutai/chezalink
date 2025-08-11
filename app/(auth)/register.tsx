@@ -32,8 +32,7 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
-
-      const res = await fetch('http://192.168.0.110:5000/api/auth/signup', {
+      const res = await fetch('http://192.168.0.106:5000/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -46,11 +45,32 @@ export default function RegisterScreen() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Registration failed');
 
-      Alert.alert('Success', 'Account created! Please log in.');
-      router.replace('/login');
+      Alert.alert('Success', 'Account created!');
+
+      // 🔍 Profile check
+      try {
+        const profileRes = await fetch(`http://192.168.0.106:5000/api/profile/${data.user.user_name}`, {
+          headers: { Authorization: `Bearer ${data.token}` },
+        });
+
+        if (profileRes.ok) {
+          const profileData = await profileRes.json();
+          if (profileData) {
+            router.replace('/(tabs)');
+          } else {
+            router.replace('/(modals)/acc-type');
+          }
+        } else if (profileRes.status === 404) {
+          router.replace('/(modals)/acc-type');
+        } else {
+          Alert.alert('Error', 'Unable to verify profile.');
+        }
+      } catch (err) {
+        console.error('❌ Profile check error:', err);
+        Alert.alert('Error', 'Unable to check profile.');
+      }
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Something went wrong';
+      const message = err instanceof Error ? err.message : 'Something went wrong';
       Alert.alert('Error', message);
     } finally {
       setLoading(false);
@@ -63,7 +83,6 @@ export default function RegisterScreen() {
       style={{ flex: 1 }}
     >
       <View style={styles.container}>
-        {/* Logo/Header */}
         <View style={styles.header}>
           <Text style={styles.logo}>
             ぷ Cheza
@@ -73,7 +92,6 @@ export default function RegisterScreen() {
 
         <Text style={styles.title}>Create an Account</Text>
 
-        {/* Name */}
         <Text style={styles.label}>Name</Text>
         <TextInput
           style={styles.input}
@@ -82,7 +100,6 @@ export default function RegisterScreen() {
           onChangeText={setUserName}
         />
 
-        {/* Email */}
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
@@ -93,7 +110,6 @@ export default function RegisterScreen() {
           onChangeText={setEmail}
         />
 
-        {/* Password */}
         <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
@@ -103,7 +119,6 @@ export default function RegisterScreen() {
           onChangeText={setPassword}
         />
 
-        {/* Confirm Password */}
         <Text style={styles.label}>Confirm Password</Text>
         <TextInput
           style={styles.input}
@@ -113,7 +128,6 @@ export default function RegisterScreen() {
           onChangeText={setConfirmPassword}
         />
 
-        {/* Register Button */}
         <LinearGradient
           colors={['#1db954', '#000']}
           start={{ x: 0, y: 0 }}
@@ -127,7 +141,6 @@ export default function RegisterScreen() {
           </TouchableOpacity>
         </LinearGradient>
 
-        {/* Navigation to Login */}
         <TouchableOpacity onPress={() => router.push('/login')}>
           <Text style={styles.linkText}>
             Already have an account?{' '}
@@ -140,63 +153,14 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    backgroundColor: '#fff',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  logo: {
-    fontSize: 26,
-    fontWeight: '900',
-    color: '#1db954',
-    fontFamily: 'sans-serif-condensed',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 24,
-    textAlign: 'center',
-    color: '#111',
-  },
-  label: {
-    fontWeight: '600',
-    fontSize: 14,
-    marginBottom: 6,
-    marginTop: 16,
-    color: '#333',
-  },
-  input: {
-    width: '100%',
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    backgroundColor: '#f9f9f9',
-  },
-  registerButton: {
-    marginTop: 30,
-    borderRadius: 12,
-    alignItems: 'center',
-    paddingVertical: 14,
-  },
-  registerButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  linkText: {
-    marginTop: 20,
-    textAlign: 'center',
-    fontSize: 14,
-    color: '#333',
-  },
-  linkBold: {
-    color: '#1db954',
-    fontWeight: 'bold',
-  },
+  container: { padding: 20, backgroundColor: '#fff', flex: 1, justifyContent: 'center' },
+  header: { alignItems: 'center', marginBottom: 40 },
+  logo: { fontSize: 26, fontWeight: '900', color: '#1db954', fontFamily: 'sans-serif-condensed' },
+  title: { fontSize: 18, fontWeight: 'bold', marginBottom: 24, textAlign: 'center', color: '#111' },
+  label: { fontWeight: '600', fontSize: 14, marginBottom: 6, marginTop: 16, color: '#333' },
+  input: { width: '100%', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#ccc', backgroundColor: '#f9f9f9' },
+  registerButton: { marginTop: 30, borderRadius: 12, alignItems: 'center', paddingVertical: 14 },
+  registerButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  linkText: { marginTop: 20, textAlign: 'center', fontSize: 14, color: '#333' },
+  linkBold: { color: '#1db954', fontWeight: 'bold' },
 });

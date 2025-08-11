@@ -2,6 +2,7 @@
 import { Stack } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function RootLayout() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -20,6 +21,7 @@ export default function RootLayout() {
   }
 
   return (
+    <GestureHandlerRootView>
     <Stack screenOptions={{ headerShown: false }}>
       {isLoggedIn ? (
         <Stack.Screen name="(tabs)" />
@@ -27,5 +29,7 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" />
       )}
     </Stack>
+    </GestureHandlerRootView>
+
   );
 }
