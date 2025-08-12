@@ -104,7 +104,7 @@ export default function EditProfileModal() {
   console.log('📤 Sending profile payload:', payload);
 
   try {
-    const response = await fetch(`http://172.20.10.14:4001/api/profile`, {
+    const response = await fetch(`http://192.168.0.106:4001/api/profile`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
