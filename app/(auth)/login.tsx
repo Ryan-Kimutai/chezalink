@@ -26,7 +26,7 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      const res = await fetch('http://192.168.0.106:5000/api/auth/login', {
+      const res = await fetch('http://172.20.10.14:5000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -47,7 +47,7 @@ export default function LoginScreen() {
 
       // Profile check and navigation
       try {
-        const profileRes = await fetch(`http://192.168.0.106:4001/api/profile/${userToStore.name}`, {
+        const profileRes = await fetch(`http://172.20.10.14:4001/api/profile/${userToStore.name}`, {
           headers: { Authorization: `Bearer ${data.token}` },
         });
 

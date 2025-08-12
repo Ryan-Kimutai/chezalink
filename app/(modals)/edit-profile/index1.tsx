@@ -1,6 +1,7 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
@@ -15,7 +16,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-
+const router = useRouter();
 const counties = [
   'Baringo', 'Bomet', 'Bungoma', 'Busia', 'Elgeyo-Marakwet', 'Embu', 'Garissa',
   'Homa Bay', 'Isiolo', 'Kajiado', 'Kakamega', 'Kericho', 'Kiambu', 'Kilifi',
@@ -74,7 +75,7 @@ useEffect(() => {
     }
   };
 
-  const handleFinish = async () => {
+const handleFinish = async () => {
   // Get token & user_name from SecureStore
   const storedToken = await SecureStore.getItemAsync('token');
   const storedUser = await SecureStore.getItemAsync('user');
@@ -114,7 +115,7 @@ useEffect(() => {
   console.log('📤 Sending profile payload:', payload);
 
   try {
-    const response = await fetch(`http://192.168.0.106:4001/api/profile`, {
+    const response = await fetch(`http://172.20.10.14:4001/api/profile`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -132,7 +133,9 @@ useEffect(() => {
 
     const data = await response.json();
     console.log('✅ Profile created:', data);
-    alert('Profile successfully created!');
+
+    // ✅ Navigate to tabs after profile creation
+    router.replace('/(tabs)');
   } catch (error: any) {
     console.error('🚨 PROFILE CREATION ERROR:', error);
     alert(
@@ -142,6 +145,7 @@ useEffect(() => {
     );
   }
 };
+
 
 
   return (

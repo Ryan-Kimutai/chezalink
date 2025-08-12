@@ -1,6 +1,7 @@
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
@@ -15,7 +16,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-
+const router = useRouter();
 const counties = [
   'Baringo', 'Bomet', 'Bungoma', 'Busia', 'Elgeyo-Marakwet', 'Embu', 'Garissa',
   'Homa Bay', 'Isiolo', 'Kajiado', 'Kakamega', 'Kericho', 'Kiambu', 'Kilifi',
@@ -78,46 +79,65 @@ export default function EditProfileModal() {
   };
 
   const handleFinish = async () => {
-    if (!token) {
-      alert('No token found. Please log in again.');
+  // Ensure token exists
+  if (!token) {
+    alert('No token found. Please log in again.');
+    return;
+  }
+
+  // Ensure username exists
+  if (!userName) {
+    alert('No username found. Please log in again.');
+    return;
+  }
+
+  const payload = {
+    user_name: userName,
+    institution_name: instName,
+    bio: bio,
+    county: location,
+    institution_type: insttype,
+    founded_year: dob,
+    account_type: 'institution',
+  };
+
+  console.log('📤 Sending profile payload:', payload);
+
+  try {
+    const response = await fetch(`http://172.20.10.14:4001/api/profile`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Failed to create profile:', errorText);
+      alert(`Failed to create profile: ${errorText}`);
       return;
     }
-    const payload = {
-        user_name:userName,
-      institution_name:instName,
-      bio:bio,
-      county:location,
-      institution_type:insttype,
-      founded_year:dob,
-      account_type: 'institution',
-     
-    };
 
-    try {
-      const response = await fetch(`http://172.20.10.14:4001/api/profile`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+    const data = await response.json();
+    console.log('✅ Profile created:', data);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Failed to create profile:', errorText);
-        alert('Failed to create profile');
-        return;
-      }
+    // Success message
+    alert('Profile successfully created!');
 
-      const data = await response.json();
-      console.log('Profile created:', data);
-      alert('Profile successfully created!');
-    } catch (error) {
-      console.error('Network error:', error);
-      alert('An error occurred while creating your profile.');
-    }
-  };
+    // Navigate to tabs
+    router.replace('/(tabs)');
+  } catch (error: any) {
+    console.error('🚨 PROFILE CREATION ERROR:', error);
+    alert(
+      `An error occurred while creating your profile.\nError: ${
+        error?.message || 'Unknown error'
+      }`
+    );
+  }
+};
+
 
   return (
     <KeyboardAvoidingView

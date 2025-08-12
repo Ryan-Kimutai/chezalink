@@ -1,5 +1,6 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
@@ -14,6 +15,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+const router = useRouter();
 
 const counties = [
   'Baringo', 'Bomet', 'Bungoma', 'Busia', 'Elgeyo-Marakwet', 'Embu', 'Garissa',
@@ -77,7 +79,8 @@ export default function EditProfileModal() {
     }
   };
 
-  const handleFinish = async () => {
+
+const handleFinish = async () => {
   if (!token) {
     alert('No token found. Please log in again.');
     return;
@@ -101,7 +104,7 @@ export default function EditProfileModal() {
   console.log('Payload:', payload);
 
   try {
-    const response = await fetch(`http://10.236.120.120:4001/api/profile`, {
+    const response = await fetch(`http://172.20.10.14:4001/api/profile`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -120,6 +123,10 @@ export default function EditProfileModal() {
     const data = await response.json();
     console.log('Profile created:', data);
     alert('Profile successfully created!');
+
+    // 🚀 Redirect to home screen
+    router.replace('/(tabs)');
+
   } catch (error) {
     console.error('Network error:', error);
     alert('An error occurred while creating your profile.');

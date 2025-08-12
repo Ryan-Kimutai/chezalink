@@ -2,7 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-const BASE_URL = 'http://192.168.0.106';
+const BASE_URL = 'http://172.20.10.14';
 const PROFILE_API = `${BASE_URL}:4001/api/profile`;
 const SOCIAL_PROFILE_API = (username: string) => `${BASE_URL}:4002/api/social/profile/${username}`;
 

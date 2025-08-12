@@ -31,7 +31,7 @@ export default function HomeScreen() {
 
   const fetchFeed = async (name: string) => {
     try {
-      const res = await fetch(`http://192.168.0.106:3000/api/posts/feed?user_name=${name}`);
+      const res = await fetch(`http://172.20.10.14:3000/api/posts/feed?user_name=${name}`);
       const data = await res.json();
       console.log('Fetched feed:', data);
       setPosts(data);
@@ -76,7 +76,7 @@ export default function HomeScreen() {
       const storedUser = await SecureStore.getItemAsync('user');
       const name = storedUser ? JSON.parse(storedUser).name : '';
 
-      const url = `http://192.168.0.106:3000/api/posts/like/${postId}`;
+      const url = `http://172.20.10.14:3000/api/posts/like/${postId}`;
       const options = {
         method: currentlyLiked ? 'DELETE' : 'POST',
         headers: { 'Content-Type': 'application/json' },

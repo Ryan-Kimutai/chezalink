@@ -20,63 +20,43 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!userName || !email || !password || !confirmPassword) {
-      Alert.alert('Missing Fields', 'Please fill all fields.');
-      return;
-    }
+  if (!userName || !email || !password || !confirmPassword) {
+    Alert.alert('Missing Fields', 'Please fill all fields.');
+    return;
+  }
 
-    if (password !== confirmPassword) {
-      Alert.alert('Password Mismatch', 'Passwords do not match.');
-      return;
-    }
+  if (password !== confirmPassword) {
+    Alert.alert('Password Mismatch', 'Passwords do not match.');
+    return;
+  }
 
-    setLoading(true);
-    try {
-      const res = await fetch('http://192.168.0.106:5000/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_name: userName,
-          email,
-          password,
-        }),
-      });
+  setLoading(true);
+  try {
+    const res = await fetch('http://172.20.10.14:5000/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_name: userName,
+        email,
+        password,
+      }),
+    });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Registration failed');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Registration failed');
 
-      Alert.alert('Success', 'Account created!');
+    Alert.alert('Success', 'Account created! Please log in.');
 
-      // 🔍 Profile check
-      try {
-        const profileRes = await fetch(`http://192.168.0.106:5000/api/profile/${data.user.user_name}`, {
-          headers: { Authorization: `Bearer ${data.token}` },
-        });
+    // ⬅ Instead of going to profile setup, send them to login
+    router.replace('/(auth)/login');
 
-        if (profileRes.ok) {
-          const profileData = await profileRes.json();
-          if (profileData) {
-            router.replace('/(tabs)');
-          } else {
-            router.replace('/(modals)/acc-type');
-          }
-        } else if (profileRes.status === 404) {
-          router.replace('/(modals)/acc-type');
-        } else {
-          Alert.alert('Error', 'Unable to verify profile.');
-        }
-      } catch (err) {
-        console.error('❌ Profile check error:', err);
-        Alert.alert('Error', 'Unable to check profile.');
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Something went wrong';
-      Alert.alert('Error', message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Something went wrong';
+    Alert.alert('Error', message);
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -92,10 +72,10 @@ export default function RegisterScreen() {
 
         <Text style={styles.title}>Create an Account</Text>
 
-        <Text style={styles.label}>Name</Text>
+        <Text style={styles.label}>Username</Text>
         <TextInput
           style={styles.input}
-          placeholder="John Doe"
+          placeholder="johndoe"
           value={userName}
           onChangeText={setUserName}
         />
